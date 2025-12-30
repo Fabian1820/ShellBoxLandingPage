@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+/* Apple-style Typography */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Apple-style letter spacing */
+h1, h2, h3 {
+  letter-spacing: -0.025em;
+  font-weight: 600;
+}
+
+/* Suavizar transiciones globales */
+* {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, transform;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Mejorar legibilidad */
+p, li {
+  line-height: 1.7;
+  font-weight: 400;
+}

@@ -1,0 +1,125 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.svelte';
+import ProductCard from '../components/ui/ProductCard.svelte';
+import Footer from '../components/Footer.astro';
+import { getAllProducts } from '../lib/productStore';
+
+// Obtener productos del store
+const products = getAllProducts();
+const categories = [...new Set(products.map(p => p.category))];
+---
+
+<BaseLayout
+  title="Stock en Cuba - ShellBox Encargos"
+  description="Productos disponibles en Cuba. Compra sin esperar encargo."
+>
+  <Header client:load />
+
+  <main class="pt-16">
+    <!-- Hero Section - Más limpio -->
+    <section class="bg-white py-20">
+      <div class="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+        <div class="text-center space-y-6">
+          <h1 class="text-5xl md:text-6xl font-semibold text-gray-900 tracking-tight">
+            Stock en Cuba
+          </h1>
+          <p class="text-xl text-gray-500 font-light max-w-2xl mx-auto leading-relaxed">
+            Productos disponibles inmediatamente. No necesitas hacer encargo.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filters Section - Más discreto -->
+    <section class="py-6 bg-gray-50 border-b border-gray-200">
+      <div class="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="text-sm text-gray-500 font-medium">Categorías:</span>
+          <button class="px-4 py-1.5 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors">
+            Todos
+          </button>
+          {categories.map(category => (
+            <button class="px-4 py-1.5 bg-white text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors border border-gray-200">
+              {category}
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Products Grid - Más aire -->
+    <section class="py-16 bg-gray-50">
+      <div class="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+        {products.length > 0 ? (
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {products.map((product, index) => (
+              <div style={`animation: fadeInUp 0.6s ease-out forwards; animation-delay: ${index * 0.1}s; opacity: 0;`}>
+                <ProductCard {...product} client:visible />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div class="text-center py-16">
+            <div class="w-24 h-24 mx-auto mb-6 bg-gray-200 rounded-full flex items-center justify-center">
+              <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+              </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-700 mb-2">No hay productos disponibles</h3>
+            <p class="text-gray-500 mb-6">Por el momento no tenemos stock en Cuba. ¡Haz un encargo!</p>
+            <a
+              href="https://www.instagram.com/shellboxencargos/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105"
+            >
+              <span>Hacer un Encargo</span>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
+          </div>
+        )}
+      </div>
+    </section>
+
+    <!-- Info Section -->
+    <section class="py-12 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl p-8 text-center">
+          <h3 class="text-2xl font-bold text-gray-900 mb-4">
+            ¿No encuentras lo que buscas?
+          </h3>
+          <p class="text-gray-600 mb-6">
+            Estos son productos que ya están en Cuba. Si quieres algo específico, ¡haz un encargo personalizado!
+          </p>
+          <a
+            href="/"
+            class="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105"
+          >
+            <span>Ver Cómo Funciona</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<style>
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>

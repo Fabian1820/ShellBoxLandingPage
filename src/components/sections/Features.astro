@@ -1,0 +1,93 @@
+---
+const features = [
+  {
+    icon: 'price',
+    title: 'Precio transparente',
+    description: 'Conoce el precio final al momento de hacer tu pedido. No esperes a que llegue y se pese en Cuba.',
+  },
+  {
+    icon: 'speed',
+    title: 'Proceso eficiente',
+    description: '5 días para recoger pedidos, 20-25 días para entrega en Cuba. Proceso organizado y predecible.',
+  },
+  {
+    icon: 'support',
+    title: 'Acompañamiento total',
+    description: 'No solo recibes productos, te brindamos asesoramiento y respaldo constante durante todo el proceso.',
+  },
+  {
+    icon: 'trust',
+    title: 'Confianza y experiencia',
+    description: 'Empresa cubana-española con experiencia en logística internacional. Tu satisfacción es nuestra prioridad.',
+  },
+];
+---
+
+<section class="py-32 bg-gray-50" id="caracteristicas">
+  <div class="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+    <!-- Section Header - Más aire, jerarquía clara -->
+    <div class="text-center mb-24">
+      <h2 class="text-5xl md:text-6xl font-semibold text-gray-900 mb-6 tracking-tight">
+        ¿Por qué elegir ShellBox?
+      </h2>
+      <p class="text-xl text-gray-500 font-light max-w-2xl mx-auto leading-relaxed">
+        Nos diferenciamos por nuestra transparencia, eficiencia y el compromiso con nuestros clientes.
+      </p>
+    </div>
+
+    <!-- Features Grid - Más limpio, menos adornos -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      {features.map((feature, index) => (
+        <div
+          class="group relative bg-white p-10 rounded-2xl hover:shadow-lg transition-all duration-300 border border-gray-100"
+          style={`animation: fadeInUp 0.6s ease-out forwards; animation-delay: ${index * 0.1}s; opacity: 0;`}
+        >
+          <!-- Icon - Más sutil -->
+          <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center mb-6">
+            {feature.icon === 'price' && (
+              <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            )}
+            {feature.icon === 'speed' && (
+              <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+              </svg>
+            )}
+            {feature.icon === 'support' && (
+              <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+              </svg>
+            )}
+            {feature.icon === 'trust' && (
+              <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+              </svg>
+            )}
+          </div>
+
+          <!-- Content - Tipografía estructurada -->
+          <h3 class="text-xl font-semibold text-gray-900 mb-3">
+            {feature.title}
+          </h3>
+          <p class="text-base text-gray-600 font-light leading-relaxed">
+            {feature.description}
+          </p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
