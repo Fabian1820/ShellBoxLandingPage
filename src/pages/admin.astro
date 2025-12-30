@@ -1,48 +1,140 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import AdminPanel from '../components/admin/AdminPanel.svelte';
-import { getAllProducts } from '../lib/productStore';
-
-const products = getAllProducts();
+import Login from '../components/admin/Login.svelte';
 ---
 
 <BaseLayout
   title="Panel Administrativo - ShellBox"
   description="Gestión de productos ShellBox"
 >
-  <div class="min-h-screen bg-gray-50">
-    <!-- Header del Admin -->
-    <header class="bg-white border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-        <div class="flex items-center justify-between h-16">
-          <div class="flex items-center space-x-3">
-            <img src="/shellboxlogo.jpg" alt="ShellBox" class="h-8 w-auto" />
-            <span class="text-sm font-medium text-gray-500">Admin</span>
+  <div id="admin-container" class="min-h-screen bg-gray-50">
+    <!-- Login Component (se muestra inicialmente) -->
+    <div id="login-view">
+      <Login client:load />
+    </div>
+
+    <!-- Admin Panel (se muestra después del login) -->
+    <div id="admin-view" style="display: none;">
+      <!-- Header del Admin -->
+      <header class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div class="flex items-center justify-between h-16">
+            <div class="flex items-center space-x-3">
+              <img src="/shellboxlogo.jpg" alt="ShellBox" class="h-8 w-auto" />
+              <span class="text-sm font-medium text-gray-500">Admin</span>
+            </div>
+            <div class="flex items-center space-x-4">
+              <span id="user-email" class="text-sm text-gray-600"></span>
+              <button
+                id="logout-btn"
+                class="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Cerrar sesión
+              </button>
+              <a
+                href="/"
+                class="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Ver sitio web
+              </a>
+            </div>
           </div>
-          <a
-            href="/"
-            class="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            Ver sitio web
-          </a>
         </div>
-      </div>
-    </header>
+      </header>
 
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-12">
-      <!-- Page Title -->
-      <div class="mb-8">
-        <h1 class="text-4xl font-semibold text-gray-900 tracking-tight mb-2">
-          Gestión de Productos
-        </h1>
-        <p class="text-base text-gray-500 font-light">
-          Administra el inventario de productos en stock de Cuba
-        </p>
-      </div>
+      <!-- Main Content -->
+      <main class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-12">
+        <!-- Page Title -->
+        <div class="mb-8">
+          <h1 class="text-4xl font-semibold text-gray-900 tracking-tight mb-2">
+            Gestión de Productos
+          </h1>
+          <p class="text-base text-gray-500 font-light">
+            Administra el inventario de productos en stock de Cuba
+          </p>
+        </div>
 
-      <!-- Admin Component (Svelte) -->
-      <AdminPanel initialProducts={products} client:load />
-    </main>
+        <!-- Admin Component (Svelte) -->
+        <AdminPanel client:load />
+      </main>
+    </div>
   </div>
+
+  <script>
+    // Verificar autenticación al cargar
+    async function checkAuth() {
+      const token = localStorage.getItem('auth_token');
+
+      if (!token) {
+        showLogin();
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/auth/verify', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          showAdmin(data.user.email);
+        } else {
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('user_email');
+          showLogin();
+        }
+      } catch (error) {
+        console.error('Error verificando autenticación:', error);
+        showLogin();
+      }
+    }
+
+    function showLogin() {
+      const loginView = document.getElementById('login-view');
+      const adminView = document.getElementById('admin-view');
+      if (loginView) loginView.style.display = 'block';
+      if (adminView) adminView.style.display = 'none';
+    }
+
+    function showAdmin(email: string) {
+      const loginView = document.getElementById('login-view');
+      const adminView = document.getElementById('admin-view');
+      const userEmailSpan = document.getElementById('user-email');
+
+      if (loginView) loginView.style.display = 'none';
+      if (adminView) adminView.style.display = 'block';
+      if (userEmailSpan) userEmailSpan.textContent = email;
+    }
+
+    function logout() {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user_email');
+      showLogin();
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      checkAuth();
+
+      // Botón de logout
+      const logoutBtn = document.getElementById('logout-btn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', logout);
+      }
+
+      // Escuchar evento de login desde el componente Login
+      window.addEventListener('login-success', () => {
+        const email = localStorage.getItem('user_email') || '';
+        showAdmin(email);
+      });
+    });
+
+    // Exponer función para que el componente Login pueda llamarla
+    (window as any).handleLoginSuccess = (token: string) => {
+      window.dispatchEvent(new Event('login-success'));
+    };
+  </script>
 </BaseLayout>

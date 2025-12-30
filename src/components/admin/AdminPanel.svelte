@@ -1,18 +1,37 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import type { Product } from '../../lib/productStore';
   import ProductList from './ProductList.svelte';
   import ProductForm from './ProductForm.svelte';
 
-  interface Props {
-    initialProducts: Product[];
-  }
-
-  let { initialProducts }: Props = $props();
-
-  let products = $state<Product[]>(initialProducts);
+  let products = $state<Product[]>([]);
   let showForm = $state(false);
   let editingProduct = $state<Product | null>(null);
   let notification = $state<{ message: string; type: 'success' | 'error' } | null>(null);
+  let loading = $state(true);
+
+  function getAuthHeaders() {
+    const token = localStorage.getItem('auth_token');
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    };
+  }
+
+  async function loadProducts() {
+    try {
+      loading = true;
+      const response = await fetch('/api/products');
+      if (response.ok) {
+        products = await response.json();
+      }
+    } catch (error) {
+      console.error('Error loading products:', error);
+      showNotification('Error al cargar productos', 'error');
+    } finally {
+      loading = false;
+    }
+  }
 
   function showNotification(message: string, type: 'success' | 'error' = 'success') {
     notification = { message, type };
@@ -37,7 +56,7 @@
         // Actualizar producto existente
         const response = await fetch(`/api/products/${editingProduct.id}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAuthHeaders(),
           body: JSON.stringify(productData),
         });
 
@@ -45,12 +64,15 @@
           const updated = await response.json();
           products = products.map(p => p.id === editingProduct!.id ? updated : p);
           showNotification('Producto actualizado correctamente');
+        } else {
+          const error = await response.json();
+          throw new Error(error.error || 'Error al actualizar');
         }
       } else {
         // Crear nuevo producto
         const response = await fetch('/api/products', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAuthHeaders(),
           body: JSON.stringify(productData),
         });
 
@@ -58,12 +80,15 @@
           const newProduct = await response.json();
           products = [...products, newProduct];
           showNotification('Producto creado correctamente');
+        } else {
+          const error = await response.json();
+          throw new Error(error.error || 'Error al crear');
         }
       }
       showForm = false;
       editingProduct = null;
-    } catch (error) {
-      showNotification('Error al guardar el producto', 'error');
+    } catch (error: any) {
+      showNotification(error.message || 'Error al guardar el producto', 'error');
       console.error('Error:', error);
     }
   }
@@ -74,14 +99,18 @@
     try {
       const response = await fetch(`/api/products/${id}`, {
         method: 'DELETE',
+        headers: getAuthHeaders(),
       });
 
       if (response.ok) {
         products = products.filter(p => p.id !== id);
         showNotification('Producto eliminado correctamente');
+      } else {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al eliminar');
       }
-    } catch (error) {
-      showNotification('Error al eliminar el producto', 'error');
+    } catch (error: any) {
+      showNotification(error.message || 'Error al eliminar el producto', 'error');
       console.error('Error:', error);
     }
   }
@@ -90,6 +119,10 @@
     showForm = false;
     editingProduct = null;
   }
+
+  onMount(() => {
+    loadProducts();
+  });
 </script>
 
 <div class="space-y-6">
