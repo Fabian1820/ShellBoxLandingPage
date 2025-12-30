@@ -8,7 +8,10 @@ export const POST: APIRoute = async ({ request }) => {
     await connectDB();
     const { email, password } = await request.json();
 
+    console.log('📧 Login attempt for:', email);
+
     if (!email || !password) {
+      console.log('❌ Missing email or password');
       return new Response(
         JSON.stringify({ error: 'Email y contraseña son requeridos' }),
         {
@@ -20,7 +23,10 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Buscar admin por email
     const admin = await Admin.findOne({ email: email.toLowerCase() });
+    console.log('👤 Admin found:', !!admin);
+
     if (!admin) {
+      console.log('❌ Admin not found for email:', email);
       return new Response(
         JSON.stringify({ error: 'Credenciales inválidas' }),
         {
@@ -31,8 +37,12 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Verificar contraseña
+    console.log('🔑 Checking password...');
     const isValidPassword = await admin.comparePassword(password);
+    console.log('✅ Password valid:', isValidPassword);
+
     if (!isValidPassword) {
+      console.log('❌ Invalid password');
       return new Response(
         JSON.stringify({ error: 'Credenciales inválidas' }),
         {
