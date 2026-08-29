@@ -22,7 +22,7 @@ Crea un archivo `.env` en la raíz del proyecto (ya existe un `.env.example` que
 
 ```bash
 # MongoDB Connection
-MONGODB_URI=mongodb://mongo:hzuuHULbDyWKQaStnypoJtmWitOaOYmX@gondola.proxy.rlwy.net:49572/shellbox
+MONGODB_URI=mongodb://usuario:contraseña@host:puerto/shellbox?authSource=admin
 
 # JWT Secret (cambiar en producción)
 JWT_SECRET=shellbox-secret-key-change-in-production
@@ -117,7 +117,7 @@ El sitio estará disponible en: `http://localhost:4321`
 Configura estas variables de entorno en Railway:
 
 ```
-MONGODB_URI=mongodb://mongo:hzuuHULbDyWKQaStnypoJtmWitOaOYmX@gondola.proxy.rlwy.net:49572/shellbox
+MONGODB_URI=mongodb://usuario:contraseña@host:puerto/shellbox?authSource=admin
 JWT_SECRET=TU_CLAVE_SECRETA_SEGURA_AQUI
 ```
 
