@@ -1,0 +1,53 @@
+---
+import { FAQS } from '../../lib/config';
+---
+
+<section class="py-28 sm:py-32" id="preguntas" style="background-color: var(--bg-subtle)">
+  <div class="mx-auto max-w-3xl px-6 sm:px-8 lg:px-12">
+    <div class="reveal text-center">
+      <p
+        class="text-xs font-semibold tracking-[0.2em] uppercase"
+        style="color: var(--color-brand-amber)"
+      >
+        Preguntas frecuentes
+      </p>
+      <h2 class="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">Resolvemos tus dudas</h2>
+    </div>
+
+    <!-- <details> nativo: accesible y sin una línea de JavaScript. -->
+    <div class="mt-14 space-y-3">
+      {
+        FAQS.map((faq, i) => (
+          <details class="reveal card group px-6" style={`--reveal-delay: ${i * 60}ms`}>
+            <summary
+              class="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-left font-semibold [&::-webkit-details-marker]:hidden"
+            >
+              <span>{faq.pregunta}</span>
+              <svg
+                class="h-5 w-5 shrink-0 transition-transform duration-300 group-open:rotate-45"
+                style="color: var(--color-brand-coral)"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                aria-hidden="true"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+            </summary>
+            <p class="pb-5 leading-relaxed" style="color: var(--text-muted)">{faq.respuesta}</p>
+          </details>
+        ))
+      }
+    </div>
+
+    <p class="reveal mt-10 text-center text-sm" style="color: var(--text-muted)">
+      ¿Te queda alguna duda? Revisa los{' '}
+      <a
+        href="/terminos"
+        class="font-semibold underline underline-offset-4"
+        style="color: var(--color-brand-coral)">términos y condiciones completos</a
+      > o escríbenos directamente.
+    </p>
+  </div>
+</section>

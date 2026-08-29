@@ -1,16 +1,34 @@
 # ShellBox Encargos
 
-> Todo lo que te gusta, más cerca
+> Todo lo que te gusta, hasta tus manos
 
-Landing page moderna para ShellBox, empresa dedicada a envíos de productos desde España. Diseñado siguiendo los principios de Apple UI para una experiencia de usuario excepcional.
+Web de ShellBox Encargos, agencia intermediaria de transporte de **Estados Unidos a Cuba**.
+El cliente compra en cualquier tienda con envío a EEUU, envía el enlace o el carrito, y
+ShellBox se encarga de la compra y del traslado hasta La Habana.
+
+## 📋 Reglas del negocio
+
+Todas las tarifas, tiempos y datos de contacto viven en un único sitio,
+[`src/lib/config.ts`](src/lib/config.ts). Si cambian las condiciones se toca ese archivo y
+la web entera se actualiza sola.
+
+| Concepto | Valor |
+| :------- | :---- |
+| Miscelánea | 6 USD / libra — entrega de 5 a 7 días |
+| Carga y sobredimensionado | 3 USD / libra — entrega de 40 a 45 días |
+| Pago | En USD, al recibir la mercancía en Cuba (efectivo desde 20 USD, o Zelle) |
+| Recogida | El Vedado, La Habana — 7 días hábiles de plazo |
+
+Los términos y condiciones completos se publican en `/terminos`.
 
 ## ✨ Características
 
-- **Diseño Premium**: Interfaz limpia y moderna inspirada en Apple UI
-- **Responsive**: Funciona perfectamente en todos los dispositivos
-- **Stack Moderno**: Astro 5 + Svelte 5 + Tailwind CSS 4
-- **Rendimiento Optimizado**: Carga rápida y transiciones suaves
-- **SEO Optimizado**: Meta tags y estructura semántica
+- **Modo claro y oscuro**, con detección de la preferencia del sistema y sin parpadeo inicial
+- **Identidad de marca**: paleta tomada del logo (ámbar → coral → rosa, con teal de apoyo)
+- **Animaciones** de aparición al hacer scroll, respetando `prefers-reduced-motion`
+- **Catálogo de stock** conectado a MongoDB, con filtros por categoría y búsqueda
+- **Panel de administración** con subida de imágenes al bucket S3
+- **Stack**: Astro 5 (SSR) + Svelte 5 + Tailwind CSS 4 + MongoDB
 
 ## 🚀 Comandos
 
@@ -20,91 +38,75 @@ Landing page moderna para ShellBox, empresa dedicada a envíos de productos desd
 | `npm run dev` | Servidor de desarrollo en `localhost:4321` |
 | `npm run build` | Construir para producción |
 | `npm run start` | Iniciar servidor de producción |
-| `npm run preview` | Previsualizar build |
+| `npm run init:admin` | Crear el primer usuario administrador |
 
-## 🏗️ Estructura del Proyecto
+## 🔐 Variables de entorno
+
+Ninguna tiene valor por defecto: la aplicación falla al arrancar si falta alguna de las
+obligatorias, en lugar de arrancar con una configuración insegura.
+
+| Variable | Obligatoria | Para qué |
+| :------- | :---------- | :------- |
+| `MONGODB_URI` | Sí | Conexión a MongoDB |
+| `JWT_SECRET` | Sí | Firma de los tokens de sesión del panel |
+| `AWS_S3_BUCKET_NAME` | Para imágenes | Bucket donde se guardan las fotos de productos |
+| `AWS_ENDPOINT_URL` | Para imágenes | Endpoint compatible con S3 |
+| `AWS_ACCESS_KEY_ID` | Para imágenes | Credencial del bucket |
+| `AWS_SECRET_ACCESS_KEY` | Para imágenes | Credencial del bucket |
+| `AWS_DEFAULT_REGION` | Para imágenes | Región del bucket |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Solo para `init:admin` | Credenciales del primer admin |
+
+Copia [`.env.example`](.env.example) a `.env` para desarrollo local.
+
+## 🏗️ Estructura
 
 ```text
-ShellBox/
-├── public/
-│   └── shellboxlogo.jpg
-├── src/
-│   ├── components/
-│   │   ├── sections/
-│   │   │   ├── Hero.svelte
-│   │   │   ├── Features.astro
-│   │   │   └── HowItWorks.astro
-│   │   ├── ui/
-│   │   │   ├── ProductCard.svelte
-│   │   │   └── ScrollReveal.svelte
-│   │   ├── Header.svelte
-│   │   └── Footer.astro
-│   ├── layouts/
-│   │   └── BaseLayout.astro
-│   ├── pages/
-│   │   ├── index.astro
-│   │   └── stock.astro
-│   └── styles/
-│       └── global.css
-├── astro.config.mjs
-└── package.json
+src/
+├── components/
+│   ├── admin/          Panel: login, listado, formulario de producto
+│   ├── sections/       Secciones de la portada
+│   ├── ui/             Catálogo y tarjeta de producto
+│   ├── Header.svelte   Navegación y selector de tema
+│   └── Footer.astro
+├── layouts/
+│   └── BaseLayout.astro   Metadatos, tema sin parpadeo, observador de scroll
+├── lib/
+│   ├── config.ts       Reglas del negocio (tarifas, pasos, FAQ, contacto)
+│   ├── types.ts        Tipos compartidos y resolución de URLs de imagen
+│   ├── db.ts           Conexión a MongoDB
+│   ├── auth.ts         Firma y verificación de tokens
+│   ├── s3.ts           Subida, lectura y borrado en el bucket
+│   ├── middleware/     Comprobación de token y rol
+│   └── models/         Esquemas de Mongoose
+├── pages/
+│   ├── index.astro     Portada
+│   ├── stock.astro     Catálogo (lee de MongoDB en el servidor)
+│   ├── terminos.astro  Términos y condiciones
+│   ├── admin.astro     Panel
+│   └── api/            Endpoints
+└── styles/
+    └── global.css      Tokens de color, modo oscuro y animaciones
 ```
 
-## 🎨 Principios de Diseño
+## 🔌 API
 
-- **Claridad Visual**: Una intención principal por sección
-- **Jerarquía Clara**: Tamaños de fuente y espaciado consistentes
-- **Tipografía**: Font Inter para legibilidad óptima
-- **Espacio Negativo**: Márgenes amplios para sensación premium
-- **Interacciones Suaves**: Transiciones fluidas y naturales
-- **Consistencia**: Estilos uniformes en todo el sitio
-- **Color con Propósito**: Paleta limitada y significativa
+| Método | Ruta | Acceso |
+| :----- | :--- | :----- |
+| `GET` | `/api/products` | Público — admite `?category=` y `?available=true` |
+| `POST` | `/api/products` | Admin |
+| `GET` | `/api/products/:id` | Público |
+| `PUT` | `/api/products/:id` | Admin |
+| `DELETE` | `/api/products/:id` | Admin — borra también sus imágenes del bucket |
+| `POST` | `/api/upload` | Admin — sube imágenes y devuelve sus claves |
+| `GET` | `/api/images/*` | Público — sirve las imágenes del bucket privado |
+| `POST` | `/api/auth/login` | Público |
+| `GET` | `/api/auth/verify` | Público — valida el token recibido |
 
-## 🎨 Paleta de Colores
+## 🚢 Despliegue
 
-```css
---orange-500: #F97316;  /* Acción principal */
---gray-50:    #F9FAFB;  /* Fondo suave */
---gray-900:   #111827;  /* Texto principal */
---white:      #FFFFFF;  /* Fondo */
-```
-
-## 📦 Funcionalidades
-
-### Landing Page
-- Hero minimalista con mensaje claro
-- Sección de características con iconografía simple
-- Proceso explicado en pasos visuales
-- Footer con enlaces de contacto
-
-### Página de Stock
-- Catálogo de productos disponibles
-- Grid responsivo
-- Tarjetas de producto estilo Apple
-- Integración con WhatsApp para consultas
-
-## 📞 Contacto
-
-- **Instagram**: [@shellboxencargos](https://www.instagram.com/shellboxencargos/)
-- **WhatsApp**: +53 5 6844243
-- **Canal WhatsApp**: [Unirse al canal](https://whatsapp.com/channel/0029Vb7uvLt4o7qO1HnG1B2u)
-
-## 🛠️ Tecnologías
-
-- [Astro 5](https://astro.build) - Framework web con SSR
-- [Svelte 5](https://svelte.dev) - Framework UI reactivo
-- [Tailwind CSS 4](https://tailwindcss.com) - Framework CSS moderno
-- [TypeScript](https://www.typescriptlang.org/) - Tipado estático
-- [@astrojs/node](https://docs.astro.build/en/guides/integrations-guide/node/) - Adaptador para deployment
-
-## 🚀 Deployment
-
-Este proyecto está configurado para desplegarse en Railway con Node.js adapter:
-
-1. Build automático con `npm run build`
-2. Servidor Node.js con `npm run start`
-3. Modo SSR para mejor rendimiento y SEO
+Desplegado en Railway con el adaptador de Node en modo SSR. Railway ejecuta
+`npm run build` y luego `npm run start`. Consulta [SETUP.md](SETUP.md) para el detalle.
 
 ---
 
-Desarrollado con dedicación para **ShellBox Encargos** 🇨🇺🇪🇸
+Desarrollado para **ShellBox Encargos** 🇺🇸🇨🇺

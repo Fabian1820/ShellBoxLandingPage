@@ -1,18 +1,26 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.svelte';
-import Hero from '../components/sections/Hero.svelte';
-import Features from '../components/sections/Features.astro';
+import Hero from '../components/sections/Hero.astro';
+import Tiendas from '../components/sections/Tiendas.astro';
+import Tarifas from '../components/sections/Tarifas.astro';
 import HowItWorks from '../components/sections/HowItWorks.astro';
+import Features from '../components/sections/Features.astro';
+import FAQ from '../components/sections/FAQ.astro';
+import CTA from '../components/sections/CTA.astro';
 import Footer from '../components/Footer.astro';
 ---
 
 <BaseLayout>
-	<Header client:load />
-	<main>
-		<Hero client:visible />
-		<Features />
-		<HowItWorks />
-	</main>
-	<Footer />
+  <Header client:load actual="/" />
+  <main id="contenido">
+    <Hero />
+    <Tiendas />
+    <Tarifas />
+    <HowItWorks />
+    <Features />
+    <FAQ />
+    <CTA />
+  </main>
+  <Footer />
 </BaseLayout>

@@ -1,0 +1,286 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.svelte';
+import Footer from '../components/Footer.astro';
+import { whatsappLink } from '../lib/config';
+
+/**
+ * Términos y condiciones del servicio.
+ *
+ * Estructurados como datos para poder generar el índice lateral y los anclas
+ * sin duplicar los títulos en el marcado.
+ */
+const secciones = [
+  {
+    id: 'naturaleza',
+    titulo: 'Naturaleza del servicio',
+    parrafos: [
+      'ShellBox Encargos actúa como intermediaria de transporte internacional desde Estados Unidos hacia Cuba.',
+      'El cliente realiza sus compras en tiendas online que envían a Estados Unidos, y la agencia se encarga de trasladar la mercancía hacia Cuba.',
+    ],
+  },
+  {
+    id: 'productos-no-permitidos',
+    titulo: 'Productos no permitidos',
+    puntos: [
+      'No se aceptan productos WiFi ni equipos de telecomunicaciones restringidos.',
+      'No se aceptan artículos prohibidos por la Aduana General de Cuba.',
+      'Es responsabilidad del cliente verificar que el producto esté permitido antes de realizar la compra.',
+    ],
+    aviso:
+      'Si un producto es retenido, confiscado o decomisado por las autoridades aduanales, la agencia no se hace responsable.',
+  },
+  {
+    id: 'tiempos',
+    titulo: 'Tiempos de entrega',
+    puntos: [
+      'Los tiempos de entrega son estimados y pueden variar por factores externos.',
+      'Solo si han transcurrido 15 días desde la fecha estimada de entrega en EEUU y el paquete no ha llegado al almacén, el cliente deberá comunicarse para verificar el estado.',
+      'No nos responsabilizamos por retrasos ocasionados por la tienda, proveedor o empresa de mensajería en EEUU.',
+      'La mensajería clasificada como carga o sobredimensionada tiene un tiempo estimado de entrega de 40 a 45 días.',
+      'La mercancía clasificada como miscelánea tiene un tiempo de entrega estimado de 5 a 7 días.',
+    ],
+  },
+  {
+    id: 'devoluciones',
+    titulo: 'Errores del proveedor y devoluciones',
+    parrafos: ['La agencia no se hace responsable de:'],
+    puntos: [
+      'Productos enviados incorrectamente por la tienda.',
+      'Artículos defectuosos de fábrica.',
+      'Tallas, modelos o colores equivocados.',
+      'Diferencias de calidad respecto a las imágenes publicadas.',
+    ],
+    parrafosFinales: [
+      'Cualquier reclamación debe gestionarse directamente con la tienda donde se realizó la compra.',
+      'La agencia no ofrece servicios de devoluciones internacionales ni gestiona envíos desde Cuba hacia EEUU para efectos de cambios, reemplazos o reembolsos.',
+      'En los casos en que la tienda exija la devolución física del producto para procesar un reembolso o cambio, el cliente reconoce que dicho proceso no podrá realizarse a través de la agencia.',
+    ],
+  },
+  {
+    id: 'aranceles',
+    titulo: 'Aranceles y pagos aduanales',
+    parrafos: [
+      'Algunos productos pueden generar impuestos o aranceles aduanales, tanto a la entrada del producto en EEUU como a su entrada en Cuba.',
+      'Es responsabilidad del cliente verificar esta información antes de comprar. La agencia no asume pagos adicionales derivados de procesos aduanales.',
+    ],
+  },
+  {
+    id: 'estado-mercancia',
+    titulo: 'Estado de la mercancía',
+    parrafos: [
+      'La mercancía se envía exactamente en el mismo estado en que es recibida en Estados Unidos.',
+      'La agencia no abre, prueba ni inspecciona los productos. Los artículos se trasladan tal y como llegan del proveedor.',
+      'El cliente debe revisar su mercancía en el momento de la recogida.',
+    ],
+  },
+  {
+    id: 'tarifas',
+    titulo: 'Tarifas del servicio',
+    parrafos: ['Las tarifas se establecen de la siguiente manera:'],
+    puntos: ['Misceláneas: 6 USD por libra.', 'Carga y mercancía sobredimensionada: 3 USD por libra.'],
+    aviso:
+      'La agencia se reserva el derecho de clasificar la mercancía según sus características físicas y volumen.',
+  },
+  {
+    id: 'pedidos',
+    titulo: 'Procedimiento para realizar pedidos',
+    parrafos: [
+      'Para Amazon, Walmart u otras tiendas similares: el cliente envía el enlace del producto y la agencia realiza la compra.',
+      'Para tiendas como Temu, Shein, Fashion Nova u otras plataformas: el cliente debe enviar usuario y contraseña con el carrito previamente preparado. La agencia accede a la cuenta únicamente para efectuar el pago correspondiente.',
+    ],
+  },
+  {
+    id: 'pago',
+    titulo: 'Forma de pago',
+    puntos: [
+      'El pago se realiza una vez el cliente recibe la mercancía en Cuba.',
+      'El pago es únicamente en USD.',
+      'Se acepta efectivo o pago vía Zelle.',
+      'En caso de pago en efectivo, solo se aceptan billetes de 20 USD o denominaciones superiores.',
+    ],
+  },
+  {
+    id: 'entrega',
+    titulo: 'Entrega en Cuba',
+    puntos: [
+      'La mercancía se recoge en El Vedado, La Habana.',
+      'Una vez que la mercancía llegue a Cuba, un representante de la agencia se comunicará vía WhatsApp para notificar al cliente.',
+      'Posteriormente, los avisos de llegada de paquetes se realizarán exclusivamente a través del grupo oficial de WhatsApp de la agencia.',
+    ],
+    aviso:
+      'La participación en dicho grupo es obligatoria para todos los clientes, ya que constituye el canal oficial de comunicación para la organización y entrega de la mercancía.',
+  },
+  {
+    id: 'perdidas',
+    titulo: 'Pérdida de paquetes',
+    puntos: [
+      'Si un paquete se pierde por responsabilidad directa de la agencia, se realizará el reembolso correspondiente.',
+      'La agencia no se responsabiliza por pérdidas ocasionadas por la tienda, la mensajería en EEUU o retenciones aduanales.',
+    ],
+  },
+  {
+    id: 'plazo-recogida',
+    titulo: 'Plazo de recogida de mercancía',
+    parrafos: [
+      'Una vez notificada la llegada de los paquetes por los canales oficiales de comunicación, el cliente dispone de 7 días hábiles para recoger su mercancía.',
+      'Transcurrido dicho plazo, la agencia se reserva el derecho de aplicar las medidas organizativas internas necesarias para garantizar el correcto funcionamiento del servicio, sin derecho a reclamación posterior.',
+      'La agencia podrá otorgar flexibilidad en los tiempos de recogida según las circunstancias del momento.',
+    ],
+  },
+  {
+    id: 'aceptacion',
+    titulo: 'Aceptación de los términos',
+    parrafos: [
+      'El uso del servicio implica la aceptación total de los presentes Términos y Condiciones.',
+    ],
+  },
+];
+
+const cta = whatsappLink('¡Hola ShellBox! Tengo una duda sobre los términos del servicio.');
+---
+
+<BaseLayout
+  title="Términos y condiciones — ShellBox Encargos"
+  description="Condiciones del servicio de envío de Estados Unidos a Cuba de ShellBox Encargos: tarifas, tiempos, responsabilidades, forma de pago y entrega."
+>
+  <Header client:load actual="/terminos" />
+
+  <main id="contenido" class="pt-24">
+    <!-- Encabezado -->
+    <section class="relative overflow-hidden py-16 sm:py-20">
+      <div
+        class="pointer-events-none absolute -top-32 left-1/2 h-96 w-[42rem] -translate-x-1/2 rounded-full blur-[120px]"
+        style="background: radial-gradient(circle, color-mix(in srgb, var(--color-brand-teal) 20%, transparent), transparent 70%)"
+        aria-hidden="true"
+      >
+      </div>
+
+      <div class="relative mx-auto max-w-4xl px-6 text-center sm:px-8 lg:px-12">
+        <p
+          class="text-xs font-semibold tracking-[0.2em] uppercase"
+          style="color: var(--color-brand-teal)"
+        >
+          Servicio de envíos de Estados Unidos a Cuba
+        </p>
+        <h1 class="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">
+          Términos y condiciones
+        </h1>
+        <p class="mx-auto mt-5 max-w-2xl text-lg" style="color: var(--text-muted)">
+          Estas son las condiciones bajo las que ShellBox Encargos presta su servicio. Al usar
+          el servicio, aceptas estos términos en su totalidad.
+        </p>
+      </div>
+    </section>
+
+    <section class="pb-24">
+      <div class="mx-auto max-w-6xl px-6 sm:px-8 lg:px-12">
+        <div class="grid gap-12 lg:grid-cols-[16rem_1fr] lg:gap-16">
+          <!-- Índice pegajoso -->
+          <nav class="hidden lg:block" aria-label="Índice de términos">
+            <div class="sticky top-28">
+              <p
+                class="text-xs font-semibold tracking-[0.18em] uppercase"
+                style="color: var(--text-faint)"
+              >
+                Contenido
+              </p>
+              <ol class="mt-4 space-y-1.5">
+                {
+                  secciones.map((seccion, i) => (
+                    <li>
+                      <a
+                        href={`#${seccion.id}`}
+                        class="flex gap-2.5 rounded-lg px-2 py-1.5 text-sm transition-colors hover:underline underline-offset-4"
+                        style="color: var(--text-muted)"
+                      >
+                        <span class="tabular-nums" style="color: var(--text-faint)">
+                          {String(i + 1).padStart(2, '0')}
+                        </span>
+                        <span>{seccion.titulo}</span>
+                      </a>
+                    </li>
+                  ))
+                }
+              </ol>
+            </div>
+          </nav>
+
+          <!-- Cuerpo -->
+          <div class="space-y-4">
+            {
+              secciones.map((seccion, i) => (
+                <article id={seccion.id} class="reveal card scroll-mt-28 p-7 sm:p-9">
+                  <div class="flex items-start gap-4">
+                    <span
+                      class="text-gradient shrink-0 text-2xl font-extrabold tabular-nums"
+                      aria-hidden="true"
+                    >
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <div class="min-w-0 flex-1">
+                      <h2 class="text-xl font-bold sm:text-2xl">{seccion.titulo}</h2>
+
+                      {seccion.parrafos?.map((parrafo) => (
+                        <p class="mt-4 leading-relaxed" style="color: var(--text-muted)">
+                          {parrafo}
+                        </p>
+                      ))}
+
+                      {seccion.puntos && (
+                        <ul class="mt-4 space-y-2.5">
+                          {seccion.puntos.map((punto) => (
+                            <li class="flex gap-3 leading-relaxed" style="color: var(--text-muted)">
+                              <span
+                                class="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full"
+                                style="background-color: var(--color-brand-coral)"
+                                aria-hidden="true"
+                              />
+                              <span>{punto}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+
+                      {seccion.parrafosFinales?.map((parrafo) => (
+                        <p class="mt-4 leading-relaxed" style="color: var(--text-muted)">
+                          {parrafo}
+                        </p>
+                      ))}
+
+                      {seccion.aviso && (
+                        <p
+                          class="mt-5 rounded-xl p-4 text-sm leading-relaxed"
+                          style="background-color: var(--bg-subtle); color: var(--text-muted)"
+                        >
+                          {seccion.aviso}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </article>
+              ))
+            }
+
+            <div class="reveal card ring-gradient mt-8 p-8 text-center">
+              <h2 class="text-xl font-bold">¿Tienes alguna duda sobre estas condiciones?</h2>
+              <p class="mx-auto mt-3 max-w-lg" style="color: var(--text-muted)">
+                Escríbenos por WhatsApp y te lo explicamos antes de que hagas tu encargo.
+              </p>
+              <a
+                href={cta}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn-primary mt-6 inline-flex"
+              >
+                Preguntar por WhatsApp
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</BaseLayout>

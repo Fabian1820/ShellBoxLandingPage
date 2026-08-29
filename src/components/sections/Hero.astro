@@ -1,0 +1,276 @@
+---
+import { whatsappLink, TARIFAS } from '../../lib/config';
+
+const miscelanea = TARIFAS.find((t) => t.id === 'miscelanea')!;
+const cta = whatsappLink(
+  '¡Hola ShellBox! Quiero cotizar un encargo. Les paso el enlace de mi carrito.'
+);
+
+const sellos = [
+  { texto: 'Transparencia', icono: 'escudo' },
+  { texto: 'Seguridad', icono: 'candado' },
+  { texto: 'Asesoramiento', icono: 'auriculares' },
+  { texto: 'Diversidad', icono: 'personas' },
+];
+---
+
+<section class="relative flex min-h-screen items-center overflow-hidden pt-24 pb-16">
+  <!-- Aurora de fondo: las manchas de color del logo, muy difuminadas. -->
+  <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+    <div
+      class="animate-aurora absolute -top-40 -left-32 h-[38rem] w-[38rem] rounded-full blur-[120px]"
+      style="background: radial-gradient(circle, color-mix(in srgb, var(--color-brand-amber) 32%, transparent), transparent 70%);"
+    >
+    </div>
+    <div
+      class="animate-aurora absolute -top-24 right-0 h-[34rem] w-[34rem] rounded-full blur-[120px]"
+      style="background: radial-gradient(circle, color-mix(in srgb, var(--color-brand-pink) 28%, transparent), transparent 70%); animation-delay: -6s;"
+    >
+    </div>
+    <div
+      class="animate-aurora absolute bottom-0 left-1/3 h-[30rem] w-[30rem] rounded-full blur-[130px]"
+      style="background: radial-gradient(circle, color-mix(in srgb, var(--color-brand-teal) 26%, transparent), transparent 70%); animation-delay: -12s;"
+    >
+    </div>
+  </div>
+
+  <div class="relative z-10 mx-auto w-full max-w-7xl px-6 sm:px-8 lg:px-12">
+    <div class="grid items-center gap-16 lg:grid-cols-[1.05fr_0.95fr]">
+      <!-- Columna de texto -->
+      <div>
+        <div class="reveal">
+          <span
+            class="ring-gradient inline-flex items-center gap-2.5 rounded-full px-4 py-2 text-sm font-semibold"
+            style="color: var(--text)"
+          >
+            <span class="relative flex h-2 w-2">
+              <span
+                class="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
+                style="background-color: var(--color-brand-coral)"></span>
+              <span
+                class="relative inline-flex h-2 w-2 rounded-full"
+                style="background-color: var(--color-brand-coral)"></span>
+            </span>
+            Encargos abiertos
+          </span>
+        </div>
+
+        <h1
+          class="reveal mt-7 text-5xl leading-[1.02] font-bold tracking-tight sm:text-6xl lg:text-7xl"
+          style="--reveal-delay: 80ms"
+        >
+          Todo lo que te gusta,
+          <span class="text-gradient block">hasta tus manos</span>
+        </h1>
+
+        <p
+          class="reveal mt-7 max-w-xl text-lg leading-relaxed sm:text-xl"
+          style="color: var(--text-muted); --reveal-delay: 160ms"
+        >
+          Recogemos encargos de <strong style="color: var(--text)" class="font-semibold"
+            >todas las tiendas con envío a Estados Unidos</strong
+          > y los llevamos hasta Cuba. Nos mandas el enlace o el carrito y te decimos
+          el costo exacto antes de comprar.
+        </p>
+
+        <div class="reveal mt-9 flex flex-col gap-3 sm:flex-row" style="--reveal-delay: 240ms">
+          <a href={cta} target="_blank" rel="noopener noreferrer" class="btn-primary">
+            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"
+              ></path>
+            </svg>
+            Cotizar mi carrito
+          </a>
+          <a href="#como-funciona" class="btn-secondary">Ver cómo funciona</a>
+        </div>
+
+        <!-- Sellos del cartel, en una sola línea con separadores. -->
+        <div
+          class="reveal mt-12 flex flex-wrap items-center gap-x-6 gap-y-4"
+          style="--reveal-delay: 320ms"
+        >
+          {
+            sellos.map((sello) => (
+              <div class="flex items-center gap-2">
+                <svg
+                  class="h-5 w-5 shrink-0"
+                  style="color: var(--color-brand-teal)"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.6"
+                  aria-hidden="true"
+                >
+                  {sello.icono === 'escudo' && (
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
+                    />
+                  )}
+                  {sello.icono === 'candado' && (
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
+                    />
+                  )}
+                  {sello.icono === 'auriculares' && (
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M12 18.75a6 6 0 006-6v-1.5m-12 1.5v1.5a6 6 0 006 6zm0 0v2.25M3.75 12v-1.5a8.25 8.25 0 1116.5 0V12m-16.5 0h2.25a.75.75 0 01.75.75v3a.75.75 0 01-.75.75H3.75a.75.75 0 01-.75-.75v-3a.75.75 0 01.75-.75zm15 0h2.25a.75.75 0 01.75.75v3a.75.75 0 01-.75.75H18.75a.75.75 0 01-.75-.75v-3a.75.75 0 01.75-.75z"
+                    />
+                  )}
+                  {sello.icono === 'personas' && (
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
+                    />
+                  )}
+                </svg>
+                <span class="text-sm font-medium" style="color: var(--text-muted)">
+                  {sello.texto}
+                </span>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+
+      <!-- Columna visual: la ruta EEUU → Cuba con la tarifa destacada. -->
+      <div class="reveal relative" style="--reveal-delay: 200ms">
+        <div class="card relative overflow-hidden p-8 sm:p-10">
+          <div
+            class="bg-gradient-brand pointer-events-none absolute -top-24 -right-24 h-56 w-56 rounded-full opacity-20 blur-3xl"
+            aria-hidden="true"
+          >
+          </div>
+
+          <!-- Ruta -->
+          <div class="relative flex items-center justify-between">
+            <div class="text-center">
+              <div
+                class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl text-2xl"
+                style="background-color: var(--bg-subtle); border: 1px solid var(--border);"
+              >
+                🇺🇸
+              </div>
+              <p class="text-sm font-semibold">Estados Unidos</p>
+              <p class="text-xs" style="color: var(--text-faint)">Compramos y recibimos</p>
+            </div>
+
+            <div class="relative mx-4 flex-1">
+              <svg class="h-12 w-full" viewBox="0 0 200 48" fill="none" aria-hidden="true">
+                <path
+                  d="M4 40 Q100 -12 196 40"
+                  stroke="url(#rutaDegradado)"
+                  stroke-width="2"
+                  stroke-dasharray="6 6"
+                  stroke-linecap="round"
+                />
+                <defs>
+                  <linearGradient id="rutaDegradado" x1="0" y1="0" x2="200" y2="0">
+                    <stop offset="0%" stop-color="#f7941d" />
+                    <stop offset="50%" stop-color="#ee4e34" />
+                    <stop offset="100%" stop-color="#e5497e" />
+                  </linearGradient>
+                </defs>
+                <g>
+                  <path
+                    d="M-6 0 L8 5 L-6 10 L-2 5 Z"
+                    fill="#ee4e34"
+                    transform="translate(0,0)"
+                  >
+                    <animateMotion
+                      dur="4s"
+                      repeatCount="indefinite"
+                      rotate="auto"
+                      path="M4 40 Q100 -12 196 40"
+                    />
+                  </path>
+                </g>
+              </svg>
+            </div>
+
+            <div class="text-center">
+              <div
+                class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl text-2xl"
+                style="background-color: var(--bg-subtle); border: 1px solid var(--border);"
+              >
+                🇨🇺
+              </div>
+              <p class="text-sm font-semibold">Cuba</p>
+              <p class="text-xs" style="color: var(--text-faint)">Recoges en El Vedado</p>
+            </div>
+          </div>
+
+          <div class="my-8 h-px" style="background-color: var(--border)"></div>
+
+          <!-- Tarifa destacada -->
+          <div class="text-center">
+            <p
+              class="text-xs font-semibold tracking-[0.18em] uppercase"
+              style="color: var(--text-faint)"
+            >
+              {miscelanea.nombre}
+            </p>
+            <div class="mt-2 flex items-baseline justify-center gap-1.5">
+              <span class="text-gradient text-6xl font-extrabold tracking-tight">
+                ${miscelanea.precio}
+              </span>
+              <span class="text-lg font-medium" style="color: var(--text-muted)">/ libra</span>
+            </div>
+            <p class="mt-3 text-sm" style="color: var(--text-muted)">
+              Entrega estimada de <strong style="color: var(--text)">{miscelanea.entrega}</strong>
+            </p>
+          </div>
+
+          <div
+            class="mt-8 flex items-start gap-3 rounded-xl p-4"
+            style="background-color: var(--bg-subtle);"
+          >
+            <svg
+              class="mt-0.5 h-5 w-5 shrink-0"
+              style="color: var(--color-brand-teal)"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              stroke-width="1.8"
+              aria-hidden="true"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="text-sm leading-relaxed" style="color: var(--text-muted)">
+              <strong style="color: var(--text)">Pagas al recibir.</strong> No adelantas nada:
+              el pago se hace cuando tienes tu mercancía en Cuba.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Indicador de scroll -->
+  <div
+    class="absolute bottom-8 left-1/2 hidden -translate-x-1/2 animate-bounce opacity-40 lg:block"
+    aria-hidden="true"
+  >
+    <svg
+      class="h-5 w-5"
+      style="color: var(--text-muted)"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      stroke-width="1.5"
+    >
+      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3"
+      ></path>
+    </svg>
+  </div>
+</section>

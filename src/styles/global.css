@@ -1,28 +1,312 @@
 @import "tailwindcss";
 
-/* Apple-style Typography */
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
+/* El modo oscuro se activa con la clase .dark en <html>, puesta por el script
+   inline del layout antes del primer pintado. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Paleta de marca, tomada del logo: el degradado naranja → coral → rosa
+     de la caja y el teal de "ENCARGOS". */
+  --color-brand-amber: #f7941d;
+  --color-brand-orange: #f2732a;
+  --color-brand-coral: #ee4e34;
+  --color-brand-pink: #e5497e;
+  --color-brand-teal: #3f918f;
+  --color-brand-teal-light: #58aeac;
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  --font-display: 'Outfit', 'Inter', -apple-system, sans-serif;
+
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-aurora: aurora 18s ease infinite;
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-shimmer: shimmer 2.5s linear infinite;
 }
 
-/* Apple-style letter spacing */
-h1, h2, h3 {
-  letter-spacing: -0.025em;
-  font-weight: 600;
+/* Tokens semánticos: cada superficie y cada texto sale de aquí, así el modo
+   oscuro es un solo bloque y no una capa de overrides repartida por el sitio. */
+:root {
+  --bg: #ffffff;
+  --bg-subtle: #faf7f5;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --border: #ece5e2;
+  --border-strong: #ddd3cf;
+  --text: #1a1315;
+  --text-muted: #6d6165;
+  --text-faint: #9b9095;
+  --shadow-color: 24 12 16;
+  --glow: 0.55;
 }
 
-/* Suavizar transiciones globales */
-* {
-  transition-property: background-color, border-color, color, fill, stroke, opacity, transform;
-  transition-duration: 200ms;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+.dark {
+  --bg: #0d0a0b;
+  --bg-subtle: #131011;
+  --surface: #171314;
+  --surface-raised: #201a1c;
+  --border: #2a2325;
+  --border-strong: #3b3235;
+  --text: #f6f2f1;
+  --text-muted: #a89fa2;
+  --text-faint: #7d7376;
+  --shadow-color: 0 0 0;
+  --glow: 0.85;
 }
 
-/* Mejorar legibilidad */
-p, li {
-  line-height: 1.7;
-  font-weight: 400;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* Compensa el header fijo cuando se navega a un ancla. */
+    scroll-padding-top: 5rem;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.03em;
+    font-weight: 600;
+  }
+
+  p,
+  li {
+    line-height: 1.7;
+  }
+
+  ::selection {
+    background-color: var(--color-brand-coral);
+    color: #fff;
+  }
+
+  /* Foco visible y consistente en toda la web, para teclado y lectores. */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-coral);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@layer components {
+  .surface {
+    background-color: var(--surface);
+    border-color: var(--border);
+  }
+
+  /* Texto con el degradado del logo. */
+  .text-gradient {
+    background-image: linear-gradient(
+      100deg,
+      var(--color-brand-amber),
+      var(--color-brand-coral) 45%,
+      var(--color-brand-pink)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .bg-gradient-brand {
+    background-image: linear-gradient(
+      100deg,
+      var(--color-brand-amber),
+      var(--color-brand-coral) 50%,
+      var(--color-brand-pink)
+    );
+  }
+
+  /* Botón principal: el degradado de marca desplazándose en hover. */
+  .btn-primary {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.875rem;
+    padding: 0.875rem 1.75rem;
+    font-weight: 600;
+    color: #fff;
+    background-image: linear-gradient(
+      100deg,
+      var(--color-brand-amber),
+      var(--color-brand-coral) 50%,
+      var(--color-brand-pink)
+    );
+    background-size: 200% 100%;
+    background-position: 0% 50%;
+    box-shadow: 0 8px 24px -8px rgb(238 78 52 / var(--glow));
+    transition:
+      background-position 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+      box-shadow 0.3s,
+      transform 0.15s;
+  }
+
+  .btn-primary:hover {
+    background-position: 100% 50%;
+    box-shadow: 0 12px 32px -8px rgb(229 73 126 / var(--glow));
+  }
+
+  .btn-primary:active {
+    transform: scale(0.98);
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.875rem;
+    padding: 0.875rem 1.75rem;
+    font-weight: 600;
+    color: var(--text);
+    background-color: var(--surface);
+    border: 1px solid var(--border-strong);
+    transition:
+      border-color 0.2s,
+      background-color 0.2s,
+      transform 0.15s;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--color-brand-coral);
+    color: var(--color-brand-coral);
+  }
+
+  .btn-secondary:active {
+    transform: scale(0.98);
+  }
+
+  .card {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 1.25rem;
+    transition:
+      border-color 0.3s,
+      box-shadow 0.3s,
+      transform 0.3s;
+  }
+
+  .card-hover:hover {
+    border-color: color-mix(in srgb, var(--color-brand-coral) 45%, transparent);
+    box-shadow: 0 18px 40px -20px rgb(var(--shadow-color) / 0.28);
+    transform: translateY(-3px);
+  }
+
+  /* Borde degradado sin pseudo-elementos extra en el marcado. */
+  .ring-gradient {
+    background:
+      linear-gradient(var(--surface), var(--surface)) padding-box,
+      linear-gradient(
+          130deg,
+          var(--color-brand-amber),
+          var(--color-brand-coral),
+          var(--color-brand-pink)
+        )
+        border-box;
+    border: 1px solid transparent;
+  }
+}
+
+/* ---------- Animaciones ---------- */
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-18px) rotate(1.5deg);
+  }
+}
+
+@keyframes aurora {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  33% {
+    transform: translate3d(6%, -4%, 0) scale(1.12);
+  }
+  66% {
+    transform: translate3d(-5%, 5%, 0) scale(0.94);
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    /* La pista se duplica en el marcado, así que -50% reinicia sin salto. */
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+/* Aparición al hacer scroll. El observador del layout añade .is-visible. */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Sin JS las secciones deben verse igual: si el script no corre, nada queda
+   invisible para siempre. */
+.no-js .reveal {
+  opacity: 1;
+  transform: none;
+}
+
+.marquee-track {
+  animation: var(--animate-marquee);
+}
+
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Respeta a quien pide menos movimiento: se apaga todo lo decorativo. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
 }

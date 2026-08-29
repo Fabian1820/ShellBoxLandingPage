@@ -1,119 +1,193 @@
 <script lang="ts">
-  let isScrolled = $state(false);
-  let mobileMenuOpen = $state(false);
+  import { onMount } from 'svelte';
+  import { whatsappLink } from '../lib/config';
 
-  if (typeof window !== 'undefined') {
-    window.addEventListener('scroll', () => {
-      isScrolled = window.scrollY > 20;
-    });
+  interface Props {
+    /** Ruta activa, para marcar el enlace correspondiente. */
+    actual?: string;
   }
 
-  function toggleMobileMenu() {
-    mobileMenuOpen = !mobileMenuOpen;
+  let { actual = '/' }: Props = $props();
+
+  let desplazado = $state(false);
+  let menuAbierto = $state(false);
+  let oscuro = $state(false);
+
+  const enlaces = [
+    { href: '/', texto: 'Inicio' },
+    { href: '/#tarifas', texto: 'Tarifas' },
+    { href: '/#como-funciona', texto: '¿Cómo funciona?' },
+    { href: '/stock', texto: 'Stock en Cuba' },
+    { href: '/terminos', texto: 'Términos' },
+  ];
+
+  const cta = whatsappLink(
+    '¡Hola ShellBox! Quiero hacer un encargo desde Estados Unidos.'
+  );
+
+  onMount(() => {
+    oscuro = document.documentElement.classList.contains('dark');
+
+    const alHacerScroll = () => {
+      desplazado = window.scrollY > 16;
+    };
+    alHacerScroll();
+    window.addEventListener('scroll', alHacerScroll, { passive: true });
+    return () => window.removeEventListener('scroll', alHacerScroll);
+  });
+
+  function alternarTema() {
+    oscuro = !oscuro;
+    document.documentElement.classList.toggle('dark', oscuro);
+    try {
+      localStorage.setItem('theme', oscuro ? 'dark' : 'light');
+    } catch {
+      /* Sin almacenamiento el tema dura solo esta visita. */
+    }
+  }
+
+  function esActivo(href: string) {
+    return href.startsWith('/#') ? false : href === actual;
   }
 </script>
 
+<svelte:window on:keydown={(e) => e.key === 'Escape' && (menuAbierto = false)} />
+
 <header
-  class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 {isScrolled
-    ? 'bg-white/80 backdrop-blur-xl border-b border-gray-200/50'
-    : 'bg-transparent'}"
+  class="fixed top-0 right-0 left-0 z-50 transition-all duration-300"
+  style={desplazado
+    ? 'background-color: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border);'
+    : 'background-color: transparent; border-bottom: 1px solid transparent;'}
 >
-  <nav class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-    <div class="flex items-center justify-between h-16">
-      <!-- Logo -->
-      <a href="/" class="flex items-center group">
-        <img
-          src="/shellboxlogo.jpg"
-          alt="ShellBox"
-          class="h-10 w-auto transition-opacity duration-200 group-hover:opacity-80"
-        />
+  <nav class="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+    <div class="flex h-[4.5rem] items-center justify-between">
+      <a href="/" class="group flex items-center gap-3" aria-label="ShellBox Encargos, inicio">
+        <span
+          class="inline-flex rounded-xl bg-white p-1.5 transition-transform duration-300 group-hover:scale-105"
+        >
+          <img src="/shellboxlogo.jpg" alt="" class="h-9 w-auto" />
+        </span>
       </a>
 
-      <!-- Desktop Navigation - Más discreto -->
-      <div class="hidden md:flex items-center space-x-8">
-        <a
-          href="/"
-          class="text-gray-600 hover:text-gray-900 transition-colors duration-200 text-sm font-medium"
+      <div class="hidden items-center gap-1 md:flex">
+        {#each enlaces as enlace}
+          <a
+            href={enlace.href}
+            class="relative rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200"
+            style="color: {esActivo(enlace.href) ? 'var(--text)' : 'var(--text-muted)'}"
+            onmouseenter={(e) => (e.currentTarget.style.color = 'var(--text)')}
+            onmouseleave={(e) =>
+              (e.currentTarget.style.color = esActivo(enlace.href)
+                ? 'var(--text)'
+                : 'var(--text-muted)')}
+          >
+            {enlace.texto}
+            {#if esActivo(enlace.href)}
+              <span
+                class="bg-gradient-brand absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full"
+              ></span>
+            {/if}
+          </a>
+        {/each}
+
+        <button
+          onclick={alternarTema}
+          class="ml-2 rounded-lg p-2.5 transition-colors"
+          style="color: var(--text-muted)"
+          aria-label={oscuro ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+          title={oscuro ? 'Modo claro' : 'Modo oscuro'}
         >
-          Inicio
-        </a>
-        <a
-          href="/stock"
-          class="text-gray-600 hover:text-gray-900 transition-colors duration-200 text-sm font-medium"
-        >
-          Stock en Cuba
-        </a>
-        <a
-          href="/#como-funciona"
-          class="text-gray-600 hover:text-gray-900 transition-colors duration-200 text-sm font-medium"
-        >
-          ¿Cómo funciona?
-        </a>
-        <a
-          href="/#contacto"
-          class="px-5 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors duration-200 text-sm font-medium"
-        >
-          Contactar
+          {#if oscuro}
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.6">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
+              />
+            </svg>
+          {:else}
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.6">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M21.752 15.002A9.72 9.72 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"
+              />
+            </svg>
+          {/if}
+        </button>
+
+        <a href={cta} target="_blank" rel="noopener noreferrer" class="btn-primary ml-2 !px-5 !py-2.5 text-sm">
+          Cotizar mi carrito
         </a>
       </div>
 
-      <!-- Mobile menu button -->
-      <button
-        onclick={toggleMobileMenu}
-        class="md:hidden p-2 -mr-2 rounded-lg hover:bg-gray-100 transition-colors"
-        aria-label="Toggle menu"
-      >
-        <svg
-          class="w-5 h-5 text-gray-600"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
+      <div class="flex items-center gap-1 md:hidden">
+        <button
+          onclick={alternarTema}
+          class="rounded-lg p-2.5"
+          style="color: var(--text-muted)"
+          aria-label={oscuro ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
         >
-          {#if mobileMenuOpen}
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M6 18L18 6M6 6l12 12"
-            />
+          {#if oscuro}
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.6">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
+              />
+            </svg>
           {:else}
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-            />
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.6">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M21.752 15.002A9.72 9.72 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"
+              />
+            </svg>
           {/if}
-        </svg>
-      </button>
+        </button>
+
+        <button
+          onclick={() => (menuAbierto = !menuAbierto)}
+          class="rounded-lg p-2.5"
+          style="color: var(--text-muted)"
+          aria-label="Abrir menú"
+          aria-expanded={menuAbierto}
+        >
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.6">
+            {#if menuAbierto}
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            {:else}
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            {/if}
+          </svg>
+        </button>
+      </div>
     </div>
 
-    <!-- Mobile Navigation -->
-    {#if mobileMenuOpen}
-      <div class="md:hidden pb-4 animate-fadeIn border-t border-gray-100 mt-2 pt-4">
-        <div class="flex flex-col space-y-3">
+    {#if menuAbierto}
+      <div
+        class="pb-5 md:hidden"
+        style="border-top: 1px solid var(--border); background-color: color-mix(in srgb, var(--bg) 95%, transparent);"
+      >
+        <div class="flex flex-col gap-1 pt-4">
+          {#each enlaces as enlace}
+            <a
+              href={enlace.href}
+              onclick={() => (menuAbierto = false)}
+              class="rounded-lg px-3 py-2.5 text-sm font-medium"
+              style="color: {esActivo(enlace.href) ? 'var(--text)' : 'var(--text-muted)'}"
+            >
+              {enlace.texto}
+            </a>
+          {/each}
           <a
-            href="/"
-            class="text-gray-600 hover:text-gray-900 transition-colors duration-200 font-medium text-sm px-2 py-2"
+            href={cta}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-primary mt-3 w-full text-sm"
           >
-            Inicio
-          </a>
-          <a
-            href="/stock"
-            class="text-gray-600 hover:text-gray-900 transition-colors duration-200 font-medium text-sm px-2 py-2"
-          >
-            Stock en Cuba
-          </a>
-          <a
-            href="/#como-funciona"
-            class="text-gray-600 hover:text-gray-900 transition-colors duration-200 font-medium text-sm px-2 py-2"
-          >
-            ¿Cómo funciona?
-          </a>
-          <a
-            href="/#contacto"
-            class="px-5 py-2 bg-orange-500 text-white rounded-lg transition-colors duration-200 text-sm font-medium text-center mt-2"
-          >
-            Contactar
+            Cotizar mi carrito
           </a>
         </div>
       </div>

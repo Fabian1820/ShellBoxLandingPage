@@ -1,14 +1,15 @@
-# 🚀 Setup de ShellBox con MongoDB
+# 🚀 Setup de ShellBox
 
-Este documento explica cómo configurar y desplegar ShellBox con autenticación y MongoDB.
+Cómo configurar, ejecutar y desplegar la web de ShellBox Encargos.
 
-## 📋 Requisitos Previos
+## 📋 Requisitos previos
 
-- Node.js 18+ instalado
-- Acceso a una base de datos MongoDB (Railway en este caso)
-- Cuenta de Railway para deployment
+- Node.js 18 o superior
+- Una base de datos MongoDB (en producción, el servicio MongoDB del proyecto de Railway)
+- Un bucket compatible con S3 para las imágenes de producto (opcional, pero sin él el
+  panel no puede subir fotos)
 
-## 🔧 Instalación Local
+## 🔧 Instalación local
 
 ### 1. Instalar dependencias
 
@@ -18,31 +19,31 @@ npm install
 
 ### 2. Configurar variables de entorno
 
-Crea un archivo `.env` en la raíz del proyecto (ya existe un `.env.example` que puedes copiar):
+Copia `.env.example` a `.env` y rellena los valores. **Ninguna variable obligatoria tiene
+valor por defecto**: la aplicación falla al arrancar si falta, en lugar de arrancar con una
+configuración insegura.
 
 ```bash
-# MongoDB Connection
-MONGODB_URI=mongodb://usuario:contraseña@host:puerto/shellbox?authSource=admin
-
-# JWT Secret (cambiar en producción)
-JWT_SECRET=shellbox-secret-key-change-in-production
+cp .env.example .env
 ```
 
-⚠️ **IMPORTANTE**: En producción, cambia `JWT_SECRET` por una clave secreta única y segura.
+Para generar un `JWT_SECRET` propio:
 
-### 3. Inicializar usuario admin
+```bash
+openssl rand -base64 32
+```
 
-Ejecuta el script para crear el primer usuario administrador:
+> ⚠️ Nunca escribas credenciales reales en `.env.example`, en el README ni en este archivo:
+> son ficheros versionados y acabarían públicos en GitHub.
+
+### 3. Crear el usuario administrador
+
+El script exige `MONGODB_URI`, `ADMIN_EMAIL` y `ADMIN_PASSWORD` en el entorno. No hay
+usuario ni contraseña por defecto.
 
 ```bash
 npm run init:admin
 ```
-
-Esto creará un usuario con las siguientes credenciales:
-- **Email**: `admin@shellbox.com`
-- **Contraseña**: `admin123`
-
-⚠️ **IMPORTANTE**: Cambia esta contraseña después del primer login en producción.
 
 ### 4. Ejecutar en desarrollo
 
@@ -50,242 +51,121 @@ Esto creará un usuario con las siguientes credenciales:
 npm run dev
 ```
 
-El sitio estará disponible en: `http://localhost:4321`
+Disponible en `http://localhost:4321`. El panel está en `/admin`.
 
-## 🔐 Panel Administrativo
+## 🔐 Panel de administración
 
-### Acceso
+Desde `/admin` se gestiona el catálogo que se publica en `/stock`:
 
-- URL: `/admin`
-- Email: `admin@shellbox.com`
-- Contraseña: `admin123` (cambiar después del primer login)
+- Alta, edición y borrado de productos
+- Subida de hasta 8 imágenes por producto, con reordenación (la primera es la portada)
+- Tallas, colores, categoría y subcategoría
+- Marcas de disponible, destacado y nuevo
 
-### Funcionalidades
+Al eliminar un producto se borran también sus imágenes del bucket, para que no queden
+archivos huérfanos ocupando espacio.
 
-- ✅ Login con autenticación JWT
-- ✅ CRUD completo de productos
-- ✅ Protección de rutas API
-- ✅ Almacenamiento en MongoDB
-- ✅ Cerrar sesión
+## 🗄️ Base de datos
 
-## 🗄️ Estructura de Base de Datos
-
-### Base de datos: `shellbox`
-
-### Colección: `products`
+### Colección `products`
 
 ```javascript
 {
   "_id": ObjectId,
-  "id": String,              // ID único del producto
-  "name": String,            // Nombre del producto
-  "price": Number,           // Precio en EUR
-  "description": String,     // Descripción
-  "category": String,        // Categoría
-  "subcategory": String,     // Subcategoría (opcional)
-  "sizes": [String],         // Tallas disponibles
-  "colors": [{
-    "name": String,
-    "hex": String
-  }],
-  "images": [String],        // URLs de imágenes
-  "featured": Boolean,       // Destacado
-  "new": Boolean,            // Nuevo
-  "available": Boolean,      // Disponible
+  "id": String,              // Referencia visible del producto
+  "name": String,
+  "price": Number,           // Precio en USD
+  "description": String,     // Obligatoria
+  "category": String,        // Obligatoria
+  "subcategory": String,     // Opcional
+  "sizes": [String],
+  "colors": [{ "name": String, "hex": String }],
+  "images": [String],        // CLAVES del bucket, no URLs
+  "featured": Boolean,
+  "new": Boolean,
+  "available": Boolean,
   "createdAt": Date,
   "updatedAt": Date
 }
 ```
 
-### Colección: `admins`
+> `images` guarda claves del bucket (`products/<marca-de-tiempo>-<aleatorio>-<nombre>.jpg`),
+> no URLs completas. El bucket es privado: las imágenes se sirven a través de
+> `/api/images/<clave>`, que las lee con las credenciales del servidor y las cachea.
+
+### Colección `admins`
 
 ```javascript
 {
   "_id": ObjectId,
-  "email": String,           // Email único
-  "password": String,        // Contraseña encriptada con bcrypt
+  "email": String,           // Único
+  "password": String,        // Hash bcrypt
   "role": String,            // "admin"
   "createdAt": Date,
   "updatedAt": Date
 }
 ```
 
-## 🚢 Deployment en Railway
+## 🚢 Despliegue en Railway
 
-### 1. Variables de entorno en Railway
+### 1. Variables de entorno
 
-Configura estas variables de entorno en Railway:
+En el servicio `ShellBoxLandingPage` deben estar definidas:
 
 ```
-MONGODB_URI=mongodb://usuario:contraseña@host:puerto/shellbox?authSource=admin
-JWT_SECRET=TU_CLAVE_SECRETA_SEGURA_AQUI
+MONGODB_URI          → referencia al servicio Mongo: ${{MongoDB.MONGO_URL}}/shellbox?authSource=admin
+JWT_SECRET           → clave propia generada con openssl
+AWS_S3_BUCKET_NAME   → nombre del bucket
+AWS_ENDPOINT_URL     → endpoint compatible con S3
+AWS_ACCESS_KEY_ID    → credencial del bucket
+AWS_SECRET_ACCESS_KEY→ credencial del bucket
+AWS_DEFAULT_REGION   → región del bucket
 ```
 
-### 2. Inicializar admin en producción
+### 2. Build y arranque
 
-Después del primer deploy, ejecuta el script de inicialización:
+Railway ejecuta automáticamente:
 
 ```bash
-npm run init:admin
+npm run build
+npm run start
 ```
 
-O usa la API de registro (solo para el primer admin):
+### 3. Crear el admin en producción
 
 ```bash
-POST /api/auth/register
-Content-Type: application/json
-
-{
-  "email": "admin@shellbox.com",
-  "password": "tu_contraseña_segura"
-}
+railway run npm run init:admin
 ```
 
-⚠️ **IMPORTANTE**: Considera deshabilitar la ruta `/api/auth/register` después de crear el primer admin.
-
-### 3. Build y Start
-
-Railway automáticamente ejecutará:
-
-```bash
-npm run build  # Construir la aplicación
-npm run start  # Iniciar el servidor
-```
+pasando `ADMIN_EMAIL` y `ADMIN_PASSWORD` en el entorno. **No existe endpoint público de
+registro**: se retiró para que nadie pueda crearse una cuenta de administrador.
 
 ## 🔒 Seguridad
 
-### Contraseñas
+**Contraseñas**
 
-- ✅ Las contraseñas se encriptan con bcrypt (10 rounds de salt)
-- ✅ Nunca se almacenan en texto plano
-- ✅ Se comparan usando el método `comparePassword` del modelo
+- Se cifran con bcrypt (10 rondas de sal) y nunca se guardan en claro.
+- Se comparan con el método `comparePassword` del modelo.
 
-### Tokens JWT
+**Tokens JWT**
 
-- ✅ Tokens firmados con JWT_SECRET
-- ✅ Expiración de 7 días
-- ✅ Almacenados en localStorage del navegador
-- ✅ Enviados en header `Authorization: Bearer <token>`
+- Firmados con `JWT_SECRET`, que no tiene valor por defecto.
+- Caducan a los 7 días.
+- Se guardan en `localStorage` y viajan en la cabecera `Authorization: Bearer <token>`.
+- Al recibir un 401 o 403, el panel cierra la sesión y vuelve al login.
 
-### Rutas Protegidas
+**Rutas protegidas** — requieren token válido **y** rol `admin`:
 
-Las siguientes rutas requieren autenticación:
+- `POST /api/products`
+- `PUT /api/products/:id`
+- `DELETE /api/products/:id`
+- `POST /api/upload`
 
-- `POST /api/products` - Crear producto
-- `PUT /api/products/:id` - Actualizar producto
-- `DELETE /api/products/:id` - Eliminar producto
+En las actualizaciones solo se aceptan campos de una lista blanca, de modo que un cliente
+no puede reescribir el `id` del documento ni inyectar campos ajenos al esquema.
 
-Las rutas públicas:
+**Subida de archivos**
 
-- `GET /api/products` - Obtener todos los productos
-- `GET /api/products/:id` - Obtener un producto
-
-## 📝 API Endpoints
-
-### Autenticación
-
-#### Login
-```bash
-POST /api/auth/login
-Content-Type: application/json
-
-{
-  "email": "admin@shellbox.com",
-  "password": "admin123"
-}
-
-Response:
-{
-  "success": true,
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "email": "admin@shellbox.com",
-    "role": "admin"
-  }
-}
-```
-
-#### Verificar Token
-```bash
-GET /api/auth/verify
-Authorization: Bearer <token>
-
-Response:
-{
-  "valid": true,
-  "user": {
-    "email": "admin@shellbox.com",
-    "role": "admin"
-  }
-}
-```
-
-### Productos
-
-#### Obtener todos los productos
-```bash
-GET /api/products
-```
-
-#### Crear producto (requiere auth)
-```bash
-POST /api/products
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "name": "Producto ejemplo",
-  "price": 29.99,
-  "description": "Descripción del producto",
-  "category": "Ropa",
-  "images": ["url_imagen"],
-  "available": true,
-  "featured": false,
-  "new": true
-}
-```
-
-#### Actualizar producto (requiere auth)
-```bash
-PUT /api/products/:id
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "name": "Producto actualizado",
-  "price": 39.99
-}
-```
-
-#### Eliminar producto (requiere auth)
-```bash
-DELETE /api/products/:id
-Authorization: Bearer <token>
-```
-
-## 🐛 Troubleshooting
-
-### Error: No se puede conectar a MongoDB
-
-Verifica que la URL de MongoDB sea correcta y que la base de datos esté accesible.
-
-### Error: Token inválido
-
-El token puede haber expirado (7 días). Haz login nuevamente.
-
-### Error: Credenciales inválidas
-
-Verifica que el email y contraseña sean correctos. El email no distingue mayúsculas/minúsculas.
-
-## 📚 Próximos Pasos
-
-- [ ] Implementar cambio de contraseña
-- [ ] Añadir recuperación de contraseña
-- [ ] Implementar roles y permisos más granulares
-- [ ] Añadir subida de imágenes (Cloudinary/S3)
-- [ ] Implementar paginación de productos
-- [ ] Añadir búsqueda y filtros
-
-## 📞 Soporte
-
-Para más información, consulta el archivo [CLAUDE.md](./CLAUDE.md) con las especificaciones completas del proyecto.
+- Solo se admiten JPEG, PNG, WebP, AVIF y GIF.
+- Máximo 8 MB por archivo y 8 imágenes por producto.
+- El lote se valida entero antes de subir nada.

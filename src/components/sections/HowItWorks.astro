@@ -1,89 +1,102 @@
 ---
-const steps = [
-  {
-    number: '01',
-    title: 'Periodo de pedidos',
-    description: 'Durante 5 días recogemos todos los pedidos. Envíanos los enlaces de Shein que deseas.',
-  },
-  {
-    number: '02',
-    title: 'Precio inmediato',
-    description: 'Te damos el precio final al momento, con todos los costos incluidos. Sin sorpresas.',
-  },
-  {
-    number: '03',
-    title: 'Compra y envío',
-    description: 'Compramos tus productos en España y los preparamos para el envío a Cuba.',
-  },
-  {
-    number: '04',
-    title: 'Entrega en Cuba',
-    description: 'En 20-25 días recibes tu pedido en Cuba. Te mantenemos informado todo el tiempo.',
-  },
-];
+import { PASOS, whatsappLink } from '../../lib/config';
+
+const cta = whatsappLink('¡Hola ShellBox! Les paso el enlace de mi carrito para empezar.');
 ---
 
-<section class="py-32 bg-white" id="como-funciona">
-  <div class="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
-    <!-- Section Header -->
-    <div class="text-center mb-24">
-      <h2 class="text-5xl md:text-6xl font-semibold text-gray-900 mb-6 tracking-tight">
-        ¿Cómo funciona?
+<section class="py-28 sm:py-32" id="como-funciona" style="background-color: var(--bg-subtle)">
+  <div class="mx-auto max-w-6xl px-6 sm:px-8 lg:px-12">
+    <div class="reveal mx-auto max-w-2xl text-center">
+      <p
+        class="text-xs font-semibold tracking-[0.2em] uppercase"
+        style="color: var(--color-brand-teal)"
+      >
+        Cómo funciona
+      </p>
+      <h2 class="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">
+        Cuatro pasos y ya está en camino
       </h2>
-      <p class="text-xl text-gray-500 font-light max-w-2xl mx-auto leading-relaxed">
-        Un proceso simple y transparente en 4 pasos
+      <p class="mt-5 text-lg" style="color: var(--text-muted)">
+        Tú solo tienes que preparar el carrito. Del resto nos encargamos nosotros.
       </p>
     </div>
 
-    <!-- Steps -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-      {steps.map((step, index) => (
-        <div
-          class="relative"
-          style={`animation: fadeInUp 0.6s ease-out forwards; animation-delay: ${index * 0.12}s; opacity: 0;`}
-        >
-          <!-- Step Card -->
-          <div class="bg-gray-50 rounded-2xl p-8 hover:bg-gray-100 transition-colors duration-300">
-            <!-- Number Badge - Más discreto -->
-            <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-orange-100 mb-6">
-              <span class="text-orange-500 font-semibold text-sm">{step.number}</span>
-            </div>
+    <div class="relative mt-20">
+      <!-- Línea que une los pasos en escritorio. -->
+      <div
+        class="pointer-events-none absolute top-[3.25rem] right-0 left-0 hidden h-px lg:block"
+        style="background: linear-gradient(to right, transparent, var(--border) 12%, var(--border) 88%, transparent)"
+        aria-hidden="true"
+      >
+      </div>
 
-            <!-- Content -->
-            <h3 class="text-lg font-semibold text-gray-900 mb-3">
-              {step.title}
-            </h3>
-            <p class="text-sm text-gray-600 font-light leading-relaxed">
-              {step.description}
+      <ol class="relative grid gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
+        {
+          PASOS.map((paso, i) => (
+            <li class="reveal group" style={`--reveal-delay: ${i * 110}ms`}>
+              <div
+                class="ring-gradient relative z-10 mx-auto flex h-[6.5rem] w-[6.5rem] items-center justify-center rounded-full transition-transform duration-300 group-hover:scale-105 lg:mx-0"
+              >
+                <span class="text-gradient text-3xl font-extrabold">{paso.numero}</span>
+              </div>
+
+              <div class="mt-6 text-center lg:text-left">
+                <h3 class="text-xl font-bold">{paso.titulo}</h3>
+                <p class="mt-3 leading-relaxed" style="color: var(--text-muted)">
+                  {paso.descripcion}
+                </p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+
+    <!-- Aviso sobre las tiendas que exigen acceso a la cuenta. -->
+    <div class="reveal card mt-16 p-7 sm:p-8">
+      <div class="flex flex-col gap-5 sm:flex-row sm:items-start">
+        <div
+          class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
+          style="background-color: color-mix(in srgb, var(--color-brand-teal) 14%, transparent)"
+        >
+          <svg
+            class="h-6 w-6"
+            style="color: var(--color-brand-teal)"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            stroke-width="1.7"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
+            ></path>
+          </svg>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-bold">Dos formas de hacer el pedido</h3>
+          <div class="mt-3 grid gap-4 sm:grid-cols-2">
+            <p class="text-sm leading-relaxed" style="color: var(--text-muted)">
+              <strong style="color: var(--text)">Amazon, Walmart y similares:</strong> nos envías
+              el enlace del producto y nosotros hacemos la compra.
+            </p>
+            <p class="text-sm leading-relaxed" style="color: var(--text-muted)">
+              <strong style="color: var(--text)">Shein, Temu, Fashion Nova y similares:</strong>
+              dejas el carrito preparado en tu cuenta y accedemos únicamente para efectuar el
+              pago.
             </p>
           </div>
         </div>
-      ))}
+      </div>
     </div>
 
-    <!-- CTA -->
-    <div class="text-center mt-16">
-      <a
-        href="https://www.instagram.com/shellboxencargos/"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="inline-block px-8 py-3.5 bg-orange-500 text-white rounded-xl font-medium text-base hover:bg-orange-600 active:scale-[0.98] transition-all"
-      >
-        Comenzar mi encargo
+    <div class="reveal mt-14 text-center">
+      <a href={cta} target="_blank" rel="noopener noreferrer" class="btn-primary">
+        Empezar mi encargo
       </a>
     </div>
   </div>
 </section>
-
-<style>
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-</style>
