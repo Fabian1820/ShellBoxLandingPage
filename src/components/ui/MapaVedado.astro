@@ -1,0 +1,209 @@
+---
+/**
+ * Mapa estilizado de la zona de recogida: El Vedado, La Habana.
+ *
+ * Dibujado a mano en SVG siguiendo la forma real del litoral habanero (la
+ * bahía al este, el Malecón trazando la curva del norte y la cuadrícula
+ * característica del Vedado). No usa ningún servicio de mapas: nada de claves
+ * de API, ni peticiones externas, ni problemas de licencia, y se adapta al
+ * modo oscuro como cualquier otro elemento.
+ */
+---
+
+<div class="mapa-envoltorio">
+  <svg viewBox="0 0 420 300" class="mapa" role="img" aria-labelledby="titulo-mapa">
+    <title id="titulo-mapa">Mapa de la zona de recogida en El Vedado, La Habana</title>
+
+    <defs>
+      <linearGradient id="mar" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#3f918f" stop-opacity="0.30" />
+        <stop offset="100%" stop-color="#3f918f" stop-opacity="0.10" />
+      </linearGradient>
+
+      <!-- Trama diagonal sutil para el agua. -->
+      <pattern id="olas" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+        <line x1="0" y1="0" x2="0" y2="14" stroke="#3f918f" stroke-opacity="0.16" stroke-width="1.2" />
+      </pattern>
+
+      <clipPath id="recorteTierra">
+        <path d="M0 118C58 106 104 100 150 104c52 5 96 18 140 14 48-5 90-24 130-38v220H0z" />
+      </clipPath>
+    </defs>
+
+    <!-- Agua -->
+    <rect width="420" height="300" fill="url(#mar)" />
+    <rect width="420" height="300" fill="url(#olas)" />
+
+    <!-- Tierra -->
+    <path
+      d="M0 118C58 106 104 100 150 104c52 5 96 18 140 14 48-5 90-24 130-38v220H0z"
+      class="tierra"
+    />
+
+    <!-- Cuadrícula del Vedado: calles con letras y números, giradas como en la realidad. -->
+    <g clip-path="url(#recorteTierra)" class="calles">
+      <g transform="rotate(-9 140 200)">
+        {
+          Array.from({ length: 13 }).map((_, i) => (
+            <line x1={-20 + i * 26} y1="90" x2={-20 + i * 26} y2="320" />
+          ))
+        }
+        {
+          Array.from({ length: 8 }).map((_, i) => (
+            <line x1="-40" y1={112 + i * 26} x2="360" y2={112 + i * 26} />
+          ))
+        }
+      </g>
+
+      <!-- Trazado de la bahía y el este, con otra orientación. -->
+      <g transform="rotate(16 350 210)" opacity="0.75">
+        {
+          Array.from({ length: 5 }).map((_, i) => (
+            <line x1={300 + i * 24} y1="120" x2={300 + i * 24} y2="320" />
+          ))
+        }
+      </g>
+    </g>
+
+    <!-- Malecón: la avenida que bordea la costa. -->
+    <path
+      d="M0 122C58 110 104 104 150 108c52 5 96 18 140 14 48-5 90-24 130-38"
+      class="malecon"
+    />
+
+    <!-- Avenidas principales del Vedado -->
+    <g class="avenidas">
+      <path d="M40 300C58 232 76 176 96 120" />
+      <path d="M150 300c6-70 8-124 6-186" />
+      <path d="M6 196c72-8 148-6 214 6" />
+    </g>
+
+    <!-- Marcador del punto de recogida -->
+    <g class="marcador" transform="translate(118,186)">
+      <circle class="onda onda-1" r="10" />
+      <circle class="onda onda-2" r="10" />
+      <circle class="nucleo" r="7" />
+      <circle class="centro" r="2.6" />
+    </g>
+
+    <!-- Etiqueta -->
+    <g class="etiqueta" transform="translate(140,150)">
+      <rect x="0" y="0" width="118" height="34" rx="9" />
+      <text x="12" y="14" class="etiqueta-titulo">El Vedado</text>
+      <text x="12" y="27" class="etiqueta-sub">Punto de recogida</text>
+    </g>
+
+    <!-- Referencias geográficas -->
+    <text x="300" y="52" class="rotulo-agua">Estrecho de Florida</text>
+    <text x="36" y="278" class="rotulo-tierra">La Habana</text>
+  </svg>
+</div>
+
+<style>
+  .mapa-envoltorio {
+    width: 100%;
+    overflow: hidden;
+    border-radius: 1rem;
+    background-color: var(--bg-subtle);
+  }
+
+  .mapa {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .tierra {
+    fill: var(--surface);
+  }
+
+  .calles line {
+    stroke: var(--border-strong);
+    stroke-width: 1.1;
+    opacity: 0.55;
+  }
+
+  .malecon {
+    fill: none;
+    stroke: var(--color-brand-teal);
+    stroke-width: 3;
+    stroke-linecap: round;
+    opacity: 0.85;
+  }
+
+  .avenidas path {
+    fill: none;
+    stroke: var(--border-strong);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+  }
+
+  /* ---------- Marcador ---------- */
+  .nucleo {
+    fill: var(--color-brand-coral);
+  }
+
+  .centro {
+    fill: #fff;
+  }
+
+  .onda {
+    fill: none;
+    stroke: var(--color-brand-coral);
+    stroke-width: 2;
+    opacity: 0;
+    transform-origin: center;
+    animation: expandir 3s ease-out infinite;
+  }
+
+  .onda-2 {
+    animation-delay: 1.5s;
+  }
+
+  @keyframes expandir {
+    0% {
+      transform: scale(0.6);
+      opacity: 0.9;
+    }
+    100% {
+      transform: scale(3.2);
+      opacity: 0;
+    }
+  }
+
+  /* ---------- Etiqueta ---------- */
+  .etiqueta rect {
+    fill: var(--surface);
+    stroke: var(--border);
+    stroke-width: 1;
+  }
+
+  .etiqueta-titulo {
+    fill: var(--text);
+    font-size: 12px;
+    font-weight: 700;
+    font-family: var(--font-display);
+  }
+
+  .etiqueta-sub {
+    fill: var(--text-faint);
+    font-size: 9px;
+    font-weight: 500;
+  }
+
+  .rotulo-agua,
+  .rotulo-tierra {
+    fill: var(--text-faint);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .onda {
+      animation: none;
+      opacity: 0.35;
+    }
+  }
+</style>

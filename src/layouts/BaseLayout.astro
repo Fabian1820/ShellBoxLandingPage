@@ -81,32 +81,110 @@ const ogImage = new URL('/shellboxlogo.jpg', canonical);
     <slot />
 
     <script is:inline>
-      // Aparición progresiva al hacer scroll. Un único observador para toda la
-      // página en vez de un componente por sección.
+      // Aparición progresiva al hacer scroll.
+      //
+      // El contenido queda oculto hasta que se marca como visible, así que un
+      // fallo aquí dejaría la página en blanco. Por eso hay tres caminos:
+      // el observador, una comprobación directa por posición, y una red de
+      // seguridad final. Cualquiera de ellos basta para mostrar la página.
       (function () {
-        const objetivos = document.querySelectorAll('.reveal');
-        if (!objetivos.length) return;
+        var pendientes = Array.prototype.slice.call(document.querySelectorAll('.reveal'));
+        if (!pendientes.length) return;
 
-        if (
-          !('IntersectionObserver' in window) ||
-          window.matchMedia('(prefers-reduced-motion: reduce)').matches
-        ) {
-          objetivos.forEach((el) => el.classList.add('is-visible'));
+        function mostrar(el) {
+          el.classList.add('is-visible');
+          var i = pendientes.indexOf(el);
+          if (i > -1) pendientes.splice(i, 1);
+        }
+
+        function mostrarTodo() {
+          while (pendientes.length) mostrar(pendientes[0]);
+        }
+
+        var sinMovimiento =
+          !window.matchMedia || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (sinMovimiento || !('IntersectionObserver' in window)) {
+          mostrarTodo();
           return;
         }
 
-        const observador = new IntersectionObserver(
-          (entradas) => {
-            entradas.forEach((entrada) => {
+        var observador = new IntersectionObserver(
+          function (entradas) {
+            entradas.forEach(function (entrada) {
               if (!entrada.isIntersecting) return;
-              entrada.target.classList.add('is-visible');
               observador.unobserve(entrada.target);
+              mostrar(entrada.target);
             });
           },
           { threshold: 0.12, rootMargin: '0px 0px -60px 0px' }
         );
 
-        objetivos.forEach((el) => observador.observe(el));
+        pendientes.forEach(function (el) {
+          observador.observe(el);
+        });
+
+        // Camino alternativo: comprueba la posición directamente. Cubre los
+        // casos en que el observador no se dispara (pestaña en segundo plano,
+        // renderizado suspendido, restauración desde caché).
+        var programado = false;
+
+        function revisarPorPosicion() {
+          programado = false;
+          var alto = window.innerHeight || document.documentElement.clientHeight;
+
+          // Algunos contenedores embebidos informan una altura de cero. Ahí
+          // nada llegaría a "estar en pantalla" nunca y la página se quedaría
+          // vacía, así que se muestra todo.
+          if (!alto) {
+            mostrarTodo();
+            desconectar();
+            return;
+          }
+
+          pendientes.slice().forEach(function (el) {
+            var r = el.getBoundingClientRect();
+            if (r.top < alto - 40 && r.bottom > 0) {
+              observador.unobserve(el);
+              mostrar(el);
+            }
+          });
+
+          if (!pendientes.length) desconectar();
+        }
+
+        function alDesplazar() {
+          if (programado) return;
+          programado = true;
+          // setTimeout y no requestAnimationFrame: rAF se suspende cuando la
+          // pestaña no se está pintando, que es justo cuando este respaldo
+          // tiene que funcionar.
+          setTimeout(revisarPorPosicion, 60);
+        }
+
+        function desconectar() {
+          window.removeEventListener('scroll', alDesplazar);
+          window.removeEventListener('resize', alDesplazar);
+          window.removeEventListener('pageshow', alDesplazar);
+        }
+
+        window.addEventListener('scroll', alDesplazar, { passive: true });
+        window.addEventListener('resize', alDesplazar, { passive: true });
+        window.addEventListener('pageshow', alDesplazar);
+
+        revisarPorPosicion();
+
+        // Red de seguridad: si a los 4 segundos sigue habiendo algo oculto
+        // dentro de la pantalla, se muestra igualmente. Nunca una página en
+        // blanco por un fallo de animación.
+        setTimeout(function () {
+          revisarPorPosicion();
+          var alto = window.innerHeight || document.documentElement.clientHeight;
+          pendientes.slice().forEach(function (el) {
+            var r = el.getBoundingClientRect();
+            if (r.top < alto * 1.5) mostrar(el);
+          });
+        }, 4000);
       })();
     </script>
   </body>

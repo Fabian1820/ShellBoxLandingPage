@@ -1,0 +1,274 @@
+---
+/**
+ * Caja de ShellBox abriéndose, con productos que salen flotando.
+ *
+ * Dibujada a mano en SVG con animación CSS: no hace falta ningún Lottie ni
+ * modelo 3D, pesa unos pocos kilobytes, toma los colores de la marca y se
+ * adapta al modo oscuro sin trabajo extra.
+ *
+ * La perspectiva es isométrica: la tapa gira sobre su arista trasera y los
+ * artículos suben con desfases distintos para que el movimiento no parezca
+ * mecánico.
+ */
+---
+
+<div class="escena" aria-hidden="true">
+  <svg viewBox="0 0 320 300" fill="none" class="dibujo">
+    <defs>
+      <linearGradient id="caraFrontal" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#f2732a" />
+        <stop offset="100%" stop-color="#ee4e34" />
+      </linearGradient>
+      <linearGradient id="caraLateral" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#e5497e" />
+        <stop offset="100%" stop-color="#c93a6a" />
+      </linearGradient>
+      <linearGradient id="caraTapa" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#f7941d" />
+        <stop offset="100%" stop-color="#f2732a" />
+      </linearGradient>
+      <linearGradient id="interior" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#8f2d1c" />
+        <stop offset="100%" stop-color="#c14028" />
+      </linearGradient>
+
+      <!-- Resplandor cálido que sale del interior de la caja. -->
+      <radialGradient id="resplandor">
+        <stop offset="0%" stop-color="#f7941d" stop-opacity="0.55" />
+        <stop offset="100%" stop-color="#f7941d" stop-opacity="0" />
+      </radialGradient>
+    </defs>
+
+    <!-- Sombra en el suelo -->
+    <ellipse class="sombra" cx="160" cy="252" rx="82" ry="14" fill="#000" opacity="0.13" />
+
+    <ellipse class="brillo" cx="160" cy="150" rx="95" ry="80" fill="url(#resplandor)" />
+
+    <g class="conjunto">
+      <!-- Cuerpo de la caja -->
+      <g class="caja">
+        <!-- Interior visible por la abertura -->
+        <path d="M78 150l82-34 82 34-82 30z" fill="url(#interior)" />
+
+        <!-- Cara frontal izquierda -->
+        <path d="M78 150l82 30v72l-82-40z" fill="url(#caraFrontal)" />
+        <!-- Cara frontal derecha -->
+        <path d="M242 150l-82 30v72l82-40z" fill="url(#caraLateral)" />
+
+        <!-- Cinta vertical -->
+        <path d="M160 180v72l-10-5v-72z" fill="#fff" opacity="0.18" />
+      </g>
+
+      <!-- Tapa: gira sobre la arista trasera -->
+      <g class="tapa">
+        <path d="M78 150l82-34 82 34-82 34z" fill="url(#caraTapa)" />
+        <path d="M78 150l82 34v10l-82-34z" fill="#d97706" />
+        <path d="M242 150l-82 34v10l82-34z" fill="#b45309" />
+      </g>
+
+      <!-- Artículos que salen: camiseta, zapatilla, bolso, frasco y caja pequeña -->
+      <g class="articulo art-camiseta">
+        <path
+          d="M0 10l10-7 5 3 5-3 10 7-5 6-3-2v18H8V14l-3 2z"
+          fill="#4ea8d8"
+          transform="translate(122,96)"
+        />
+      </g>
+
+      <g class="articulo art-zapatilla">
+        <path
+          d="M2 16c0-4 2-8 5-10l6 6 4-5 9 6c4 2 6 4 6 7v3H4c-1 0-2-1-2-3z"
+          fill="#58aeac"
+          transform="translate(178,104)"
+        />
+        <path d="M2 22h30v3H4c-1 0-2-1-2-3z" fill="#3f918f" transform="translate(178,104)" />
+      </g>
+
+      <g class="articulo art-bolso">
+        <path d="M3 8h22l3 20H0z" fill="#e5497e" transform="translate(106,124)" />
+        <path
+          d="M8 8V6a6 6 0 0112 0v2"
+          stroke="#c93a6a"
+          stroke-width="2.6"
+          fill="none"
+          transform="translate(106,124)"
+        />
+      </g>
+
+      <g class="articulo art-frasco">
+        <rect x="0" y="6" width="14" height="20" rx="3" fill="#f7c948" transform="translate(196,128)" />
+        <rect x="4" y="0" width="6" height="7" rx="2" fill="#e0a800" transform="translate(196,128)" />
+      </g>
+
+      <g class="articulo art-cajita">
+        <path d="M0 6l11-5 11 5-11 5z" fill="#f7941d" transform="translate(150,80)" />
+        <path d="M0 6v11l11 5V11z" fill="#d97706" transform="translate(150,80)" />
+        <path d="M22 6v11l-11 5V11z" fill="#fbbf24" transform="translate(150,80)" />
+      </g>
+    </g>
+  </svg>
+</div>
+
+<style>
+  .escena {
+    width: 100%;
+    max-width: 26rem;
+    margin-inline: auto;
+  }
+
+  .dibujo {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* La caja entera flota despacio, para que la escena no quede estática. */
+  .conjunto {
+    animation: flotar-caja 7s ease-in-out infinite;
+    transform-origin: 160px 200px;
+  }
+
+  @keyframes flotar-caja {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-9px);
+    }
+  }
+
+  .sombra {
+    animation: respirar-sombra 7s ease-in-out infinite;
+    transform-origin: 160px 252px;
+  }
+
+  @keyframes respirar-sombra {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 0.13;
+    }
+    50% {
+      transform: scale(0.9);
+      opacity: 0.09;
+    }
+  }
+
+  /* La tapa se abre y se cierra sobre su arista trasera. */
+  .tapa {
+    transform-origin: 160px 150px;
+    animation: abrir-tapa 7s ease-in-out infinite;
+  }
+
+  @keyframes abrir-tapa {
+    0%,
+    8% {
+      transform: translateY(0) rotate(0deg);
+    }
+    22%,
+    72% {
+      transform: translateY(-42px) rotate(-9deg);
+    }
+    88%,
+    100% {
+      transform: translateY(0) rotate(0deg);
+    }
+  }
+
+  .brillo {
+    opacity: 0;
+    animation: encender 7s ease-in-out infinite;
+  }
+
+  @keyframes encender {
+    0%,
+    12% {
+      opacity: 0;
+    }
+    28%,
+    68% {
+      opacity: 1;
+    }
+    85%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* Los artículos suben desde dentro, se quedan un momento y vuelven. */
+  .articulo {
+    opacity: 0;
+    animation: salir 7s ease-in-out infinite;
+  }
+
+  .art-cajita {
+    animation-delay: 0.15s;
+  }
+  .art-camiseta {
+    animation-delay: 0.35s;
+  }
+  .art-zapatilla {
+    animation-delay: 0.55s;
+  }
+  .art-bolso {
+    animation-delay: 0.75s;
+  }
+  .art-frasco {
+    animation-delay: 0.95s;
+  }
+
+  @keyframes salir {
+    0%,
+    14% {
+      opacity: 0;
+      transform: translateY(46px) scale(0.55) rotate(-12deg);
+    }
+    30% {
+      opacity: 1;
+      transform: translateY(-4px) scale(1) rotate(4deg);
+    }
+    42%,
+    62% {
+      opacity: 1;
+      transform: translateY(-12px) scale(1) rotate(-3deg);
+    }
+    76% {
+      opacity: 0;
+      transform: translateY(30px) scale(0.7) rotate(8deg);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(46px) scale(0.55) rotate(-12deg);
+    }
+  }
+
+  /* En modo oscuro la sombra plana se pierde: se sustituye por un halo. */
+  :global(.dark) .sombra {
+    fill: #000;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .conjunto,
+    .sombra,
+    .tapa,
+    .brillo,
+    .articulo {
+      animation: none;
+    }
+
+    /* Estado fijo bonito: tapa abierta y artículos fuera. */
+    .tapa {
+      transform: translateY(-42px) rotate(-9deg);
+    }
+
+    .brillo {
+      opacity: 1;
+    }
+
+    .articulo {
+      opacity: 1;
+      transform: translateY(-8px);
+    }
+  }
+</style>

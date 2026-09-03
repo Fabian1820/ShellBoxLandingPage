@@ -1,0 +1,380 @@
+---
+/**
+ * Iconos animados de los cuatro pasos, dibujados a mano en SVG.
+ *
+ * Cada uno anima al entrar en pantalla: el observador del layout añade
+ * `is-visible` al contenedor `.reveal` que los envuelve y de ahí cuelgan las
+ * animaciones, así no se reproducen mientras están fuera de la vista.
+ *
+ * Se usa CSS y no SMIL porque `prefers-reduced-motion` puede apagarlo entero.
+ */
+interface Props {
+  paso: 1 | 2 | 3 | 4;
+  class?: string;
+}
+
+const { paso, class: clase = '' } = Astro.props;
+
+const trazo = 'var(--color-brand-coral)';
+const acento = 'var(--color-brand-amber)';
+const teal = 'var(--color-brand-teal)';
+const rosa = 'var(--color-brand-pink)';
+---
+
+<svg
+  class:list={['icono-paso', `paso-${paso}`, clase]}
+  viewBox="0 0 64 64"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  {
+    paso === 1 && (
+      /* Carrito de la compra con artículos que van cayendo dentro. */
+      <>
+        <g class="articulos">
+          <rect class="art art-1" x="22" y="6" width="9" height="9" rx="2" fill={acento} />
+          <circle class="art art-2" cx="39" cy="11" r="4.5" fill={rosa} />
+          <rect class="art art-3" x="31" y="4" width="7" height="7" rx="2" fill={teal} />
+        </g>
+        <path
+          d="M6 12h5l5.5 24h27L48 20H16"
+          stroke={trazo}
+          stroke-width="3.2"
+          class="trazo-carrito"
+        />
+        <circle cx="22" cy="50" r="4" stroke={trazo} stroke-width="3.2" class="rueda rueda-1" />
+        <circle cx="41" cy="50" r="4" stroke={trazo} stroke-width="3.2" class="rueda rueda-2" />
+      </>
+    )
+  }
+
+  {
+    paso === 2 && (
+      /* Burbuja de chat con un enlace que se envía. */
+      <>
+        <path
+          d="M10 14a5 5 0 015-5h27a5 5 0 015 5v17a5 5 0 01-5 5H24l-9 8v-8a5 5 0 01-5-5z"
+          stroke={trazo}
+          stroke-width="3.2"
+          class="burbuja"
+        />
+        <g class="cadena" stroke={acento} stroke-width="3" >
+          <path d="M24 22.5l-2.5 2.5a3.9 3.9 0 005.5 5.5l2-2" />
+          <path d="M33 27.5l2.5-2.5a3.9 3.9 0 00-5.5-5.5l-2 2" />
+        </g>
+        {/* Avión de papel que sale disparado al enviar. */}
+        <path
+          d="M40 44l16-6-16-6v4.5l8 1.5-8 1.5z"
+          fill={rosa}
+          class="enviar"
+        />
+      </>
+    )
+  }
+
+  {
+    paso === 3 && (
+      /* Avión recorriendo una ruta punteada. */
+      <>
+        <path
+          id={`ruta-${paso}`}
+          d="M4 46C18 46 24 14 40 14s16 20 20 20"
+          stroke={teal}
+          stroke-width="2.6"
+          stroke-dasharray="4 5"
+          class="ruta"
+        />
+        <circle cx="4" cy="46" r="3.4" fill={teal} class="punto-origen" />
+        <g class="avion">
+          <path
+            d="M-9 0l13-4.5-2.5 4.5 2.5 4.5z"
+            fill={trazo}
+            transform="translate(0,0)"
+          />
+        </g>
+        <use href={`#ruta-${paso}`} class="ruta-oculta" />
+      </>
+    )
+  }
+
+  {
+    paso === 4 && (
+      /* Una caja que baja y aterriza sobre unas manos abiertas. */
+      <>
+        <g class="caja">
+          <path d="M12 16l20-8 20 8-20 8z" fill={acento} />
+          <path d="M12 16v20l20 8V24z" fill={trazo} />
+          <path d="M52 16v20l-20 8V24z" fill={rosa} opacity="0.85" />
+        </g>
+        <g class="manos" stroke={teal} stroke-width="3.4" fill="none">
+          <path d="M6 52c4-6 9-8 14-6l6 3" class="mano-izq" />
+          <path d="M58 52c-4-6-9-8-14-6l-6 3" class="mano-der" />
+        </g>
+      </>
+    )
+  }
+</svg>
+
+<style>
+  .icono-paso {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  /* Estado de reposo: todo quieto y en su sitio final, para que sin JS el
+     icono se vea correcto igualmente. */
+  .icono-paso :is(.art, .enviar, .avion, .caja) {
+    animation-play-state: paused;
+  }
+
+  /* ---------- Paso 1: carrito ---------- */
+  .paso-1 .art {
+    opacity: 0;
+    transform-origin: center;
+  }
+
+  :global(.is-visible) .paso-1 .art {
+    animation: caer 2.6s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    animation-play-state: running;
+  }
+
+  :global(.is-visible) .paso-1 .art-2 {
+    animation-delay: 0.35s;
+  }
+
+  :global(.is-visible) .paso-1 .art-3 {
+    animation-delay: 0.7s;
+  }
+
+  @keyframes caer {
+    0% {
+      opacity: 0;
+      transform: translateY(-14px) scale(0.6) rotate(-20deg);
+    }
+    18%,
+    52% {
+      opacity: 1;
+      transform: translateY(0) scale(1) rotate(0deg);
+    }
+    70% {
+      opacity: 1;
+      transform: translateY(16px) scale(0.85);
+    }
+    78%,
+    100% {
+      opacity: 0;
+      transform: translateY(20px) scale(0.7);
+    }
+  }
+
+  :global(.is-visible) .paso-1 .rueda {
+    animation: rodar 2.6s ease-in-out infinite;
+  }
+
+  :global(.is-visible) .paso-1 .rueda-2 {
+    animation-delay: 0.08s;
+  }
+
+  @keyframes rodar {
+    0%,
+    62%,
+    100% {
+      transform: translateX(0);
+    }
+    72% {
+      transform: translateX(2.5px);
+    }
+    84% {
+      transform: translateX(-1.5px);
+    }
+  }
+
+  /* ---------- Paso 2: enlace enviado ---------- */
+  .paso-2 .enviar {
+    opacity: 0;
+    transform-origin: center;
+  }
+
+  :global(.is-visible) .paso-2 .enviar {
+    animation: despegar 2.8s ease-in-out infinite;
+    animation-play-state: running;
+  }
+
+  @keyframes despegar {
+    0%,
+    22% {
+      opacity: 0;
+      transform: translate(-14px, 6px) scale(0.7);
+    }
+    38% {
+      opacity: 1;
+      transform: translate(-6px, 2px) scale(1);
+    }
+    62% {
+      opacity: 1;
+      transform: translate(0, 0) scale(1);
+    }
+    82%,
+    100% {
+      opacity: 0;
+      transform: translate(14px, -6px) scale(0.85);
+    }
+  }
+
+  :global(.is-visible) .paso-2 .cadena {
+    animation: latir 2.8s ease-in-out infinite;
+  }
+
+  @keyframes latir {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    18% {
+      transform: scale(1.12);
+    }
+    30% {
+      transform: scale(1);
+    }
+  }
+
+  .paso-2 .cadena {
+    transform-origin: 28px 25px;
+  }
+
+  /* ---------- Paso 3: vuelo ---------- */
+  .paso-3 .ruta {
+    stroke-dashoffset: 90;
+  }
+
+  :global(.is-visible) .paso-3 .ruta {
+    animation: avanzar-ruta 3s linear infinite;
+  }
+
+  @keyframes avanzar-ruta {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  .paso-3 .avion {
+    /* `offset-path` sigue la misma curva que la ruta punteada. */
+    offset-path: path('M4 46C18 46 24 14 40 14s16 20 20 20');
+    offset-rotate: auto;
+    offset-distance: 0%;
+    opacity: 0;
+  }
+
+  :global(.is-visible) .paso-3 .avion {
+    animation: volar 3s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+    animation-play-state: running;
+  }
+
+  @keyframes volar {
+    0% {
+      offset-distance: 0%;
+      opacity: 0;
+    }
+    12% {
+      opacity: 1;
+    }
+    86% {
+      opacity: 1;
+    }
+    100% {
+      offset-distance: 100%;
+      opacity: 0;
+    }
+  }
+
+  .paso-3 .ruta-oculta {
+    display: none;
+  }
+
+  :global(.is-visible) .paso-3 .punto-origen {
+    animation: pulso 3s ease-in-out infinite;
+    transform-origin: 4px 46px;
+  }
+
+  @keyframes pulso {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    12% {
+      transform: scale(1.5);
+      opacity: 0.6;
+    }
+  }
+
+  /* ---------- Paso 4: entrega ---------- */
+  .paso-4 .caja {
+    transform-origin: 32px 26px;
+  }
+
+  :global(.is-visible) .paso-4 .caja {
+    animation: aterrizar 3s cubic-bezier(0.34, 1.4, 0.64, 1) infinite;
+    animation-play-state: running;
+  }
+
+  @keyframes aterrizar {
+    0% {
+      transform: translateY(-16px) scale(0.85);
+      opacity: 0;
+    }
+    22% {
+      opacity: 1;
+    }
+    45%,
+    78% {
+      transform: translateY(2px) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(2px) scale(1);
+      opacity: 1;
+    }
+  }
+
+  :global(.is-visible) .paso-4 .manos > * {
+    animation: recibir 3s ease-out infinite;
+  }
+
+  @keyframes recibir {
+    0%,
+    35% {
+      transform: translateY(3px);
+    }
+    52%,
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  /* Quien pide menos movimiento ve los iconos quietos y completos. */
+  @media (prefers-reduced-motion: reduce) {
+    .icono-paso *,
+    :global(.is-visible) .icono-paso * {
+      animation: none !important;
+    }
+
+    .paso-1 .art,
+    .paso-2 .enviar,
+    .paso-3 .avion,
+    .paso-4 .caja {
+      opacity: 1;
+    }
+
+    .paso-3 .ruta {
+      stroke-dashoffset: 0;
+    }
+
+    .paso-3 .avion {
+      offset-distance: 55%;
+    }
+  }
+</style>

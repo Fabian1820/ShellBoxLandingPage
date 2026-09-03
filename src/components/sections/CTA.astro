@@ -1,5 +1,11 @@
 ---
 import { CONTACTO, whatsappLink } from '../../lib/config';
+import fs from 'node:fs';
+import path from 'node:path';
+
+// Textura opcional de cartón sobre el degradado de marca.
+const textura = '/fotos/textura-carton.jpg';
+const hayTextura = fs.existsSync(path.join(process.cwd(), 'public', textura.replace(/^\//, '')));
 
 const cta = whatsappLink('¡Hola ShellBox! Quiero hacer un encargo desde Estados Unidos.');
 ---
@@ -8,6 +14,18 @@ const cta = whatsappLink('¡Hola ShellBox! Quiero hacer un encargo desde Estados
   <div
     class="bg-gradient-brand relative mx-auto max-w-6xl overflow-hidden rounded-[2rem] px-8 py-20 text-center sm:px-16"
   >
+    {
+      hayTextura && (
+        <img
+          src={textura}
+          alt=""
+          class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-25 mix-blend-overlay"
+          aria-hidden="true"
+          loading="lazy"
+        />
+      )
+    }
+
     <!-- Trazos decorativos que recuerdan al cartel de la marca. -->
     <svg
       class="pointer-events-none absolute inset-0 h-full w-full opacity-[0.18]"

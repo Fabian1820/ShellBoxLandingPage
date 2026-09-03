@@ -68,19 +68,29 @@ export const PASOS = [
   },
 ] as const;
 
+/**
+ * Tiendas de las que recogemos encargos.
+ *
+ * `color` es el color corporativo de cada marca y `slug` el nombre del archivo
+ * que se busca en `public/tiendas/<slug>.svg`. Si ese archivo existe se pinta
+ * el logotipo; si no, se muestra el nombre con el color de la marca. Así la web
+ * no incluye material de marca de terceros salvo que se añada a propósito.
+ */
 export const TIENDAS = [
-  'Amazon',
-  'Walmart',
-  'Shein',
-  'Temu',
-  'Fashion Nova',
-  'eBay',
-  'Target',
-  'Best Buy',
-  'Nike',
-  'Zara',
-  'AliExpress',
-  'Home Depot',
+  { nombre: 'Amazon', slug: 'amazon', color: '#FF9900' },
+  { nombre: 'Walmart', slug: 'walmart', color: '#0071DC' },
+  { nombre: 'Shein', slug: 'shein', color: '#000000', colorOscuro: '#FFFFFF' },
+  { nombre: 'Temu', slug: 'temu', color: '#FB7701' },
+  { nombre: 'Fashion Nova', slug: 'fashion-nova', color: '#000000', colorOscuro: '#FFFFFF' },
+  { nombre: 'eBay', slug: 'ebay', color: '#E53238' },
+  { nombre: 'Target', slug: 'target', color: '#CC0000' },
+  { nombre: 'Best Buy', slug: 'best-buy', color: '#0046BE' },
+  { nombre: 'Nike', slug: 'nike', color: '#111111', colorOscuro: '#FFFFFF' },
+  { nombre: 'Zara', slug: 'zara', color: '#000000', colorOscuro: '#FFFFFF' },
+  { nombre: 'AliExpress', slug: 'aliexpress', color: '#FF4747' },
+  { nombre: 'Home Depot', slug: 'home-depot', color: '#F96302' },
+  { nombre: 'Sephora', slug: 'sephora', color: '#000000', colorOscuro: '#FFFFFF' },
+  { nombre: 'Victoria\u2019s Secret', slug: 'victorias-secret', color: '#D6006F' },
 ] as const;
 
 export const VENTAJAS = [

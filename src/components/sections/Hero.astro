@@ -1,5 +1,13 @@
 ---
 import { whatsappLink, TARIFAS } from '../../lib/config';
+import CajaAnimada from '../ui/CajaAnimada.astro';
+import fs from 'node:fs';
+import path from 'node:path';
+
+// Foto ambiental opcional detrás del texto. Si el archivo no está, el hero se
+// queda solo con la aurora de color, que ya funciona por sí sola.
+const fotoFondo = '/fotos/hero-cajas.jpg';
+const hayFoto = fs.existsSync(path.join(process.cwd(), 'public', fotoFondo.replace(/^\//, '')));
 
 const miscelanea = TARIFAS.find((t) => t.id === 'miscelanea')!;
 const cta = whatsappLink(
@@ -15,6 +23,18 @@ const sellos = [
 ---
 
 <section class="relative flex min-h-screen items-center overflow-hidden pt-24 pb-16">
+  {
+    hayFoto && (
+      <img
+        src={fotoFondo}
+        alt=""
+        class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.14] dark:opacity-[0.10]"
+        aria-hidden="true"
+        fetchpriority="high"
+      />
+    )
+  }
+
   <!-- Aurora de fondo: las manchas de color del logo, muy difuminadas. -->
   <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
     <div
@@ -142,7 +162,10 @@ const sellos = [
 
       <!-- Columna visual: la ruta EEUU → Cuba con la tarifa destacada. -->
       <div class="reveal relative" style="--reveal-delay: 200ms">
-        <div class="card relative overflow-hidden p-8 sm:p-10">
+        <!-- Ilustración protagonista -->
+        <CajaAnimada />
+
+        <div class="card relative -mt-6 overflow-hidden p-7 sm:p-8">
           <div
             class="bg-gradient-brand pointer-events-none absolute -top-24 -right-24 h-56 w-56 rounded-full opacity-20 blur-3xl"
             aria-hidden="true"
@@ -207,7 +230,7 @@ const sellos = [
             </div>
           </div>
 
-          <div class="my-8 h-px" style="background-color: var(--border)"></div>
+          <div class="my-6 h-px" style="background-color: var(--border)"></div>
 
           <!-- Tarifa destacada -->
           <div class="text-center">
@@ -218,7 +241,7 @@ const sellos = [
               {miscelanea.nombre}
             </p>
             <div class="mt-2 flex items-baseline justify-center gap-1.5">
-              <span class="text-gradient text-6xl font-extrabold tracking-tight">
+              <span class="text-gradient text-5xl font-extrabold tracking-tight">
                 ${miscelanea.precio}
               </span>
               <span class="text-lg font-medium" style="color: var(--text-muted)">/ libra</span>
@@ -229,7 +252,7 @@ const sellos = [
           </div>
 
           <div
-            class="mt-8 flex items-start gap-3 rounded-xl p-4"
+            class="mt-6 flex items-start gap-3 rounded-xl p-4"
             style="background-color: var(--bg-subtle);"
           >
             <svg

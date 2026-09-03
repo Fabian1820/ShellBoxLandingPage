@@ -1,5 +1,6 @@
 ---
 import { PASOS, whatsappLink } from '../../lib/config';
+import IconoPaso from '../ui/IconoPaso.astro';
 
 const cta = whatsappLink('¡Hola ShellBox! Les paso el enlace de mi carrito para empezar.');
 ---
@@ -34,10 +35,21 @@ const cta = whatsappLink('¡Hola ShellBox! Les paso el enlace de mi carrito para
         {
           PASOS.map((paso, i) => (
             <li class="reveal group" style={`--reveal-delay: ${i * 110}ms`}>
-              <div
-                class="ring-gradient relative z-10 mx-auto flex h-[6.5rem] w-[6.5rem] items-center justify-center rounded-full transition-transform duration-300 group-hover:scale-105 lg:mx-0"
-              >
-                <span class="text-gradient text-3xl font-extrabold">{paso.numero}</span>
+              <div class="relative mx-auto w-[6.5rem] lg:mx-0">
+                <div
+                  class="ring-gradient relative z-10 flex h-[6.5rem] w-[6.5rem] items-center justify-center rounded-full transition-transform duration-300 group-hover:scale-105"
+                  style="background-color: var(--bg-subtle)"
+                >
+                  <IconoPaso paso={(i + 1) as 1 | 2 | 3 | 4} class="h-14 w-14" />
+                </div>
+
+                {/* El número queda como distintivo pequeño, sin robarle
+                    protagonismo a la ilustración. */}
+                <span
+                  class="bg-gradient-brand absolute -top-1 -right-1 z-20 flex h-8 w-8 items-center justify-center rounded-full text-xs font-extrabold text-white"
+                >
+                  {paso.numero}
+                </span>
               </div>
 
               <div class="mt-6 text-center lg:text-left">
