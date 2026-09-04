@@ -369,8 +369,11 @@
     height: 2.5rem;
     color: var(--color-brand-coral);
     filter: drop-shadow(0 3px 5px rgb(0 0 0 / 0.35));
-    /* Sin fill-mode a propósito: el estado base ya es el definitivo, así que
-       si la animación no llega a ejecutarse el pin se ve igualmente. */
+    /* La animación mueve el pin, pero nunca su opacidad. Mientras una animación
+       está activa manda ella, y si el navegador la congela (pestaña sin pintar)
+       el elemento se queda en el primer fotograma: con opacidad animada desde
+       cero, el marcador quedaba invisible. Animando solo la posición, lo peor
+       que puede pasar es que aparezca un poco más arriba. */
     animation: caer-pin 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
@@ -382,11 +385,9 @@
   @keyframes caer-pin {
     from {
       transform: translateY(-14px) scale(0.7);
-      opacity: 0;
     }
     to {
       transform: none;
-      opacity: 1;
     }
   }
 
