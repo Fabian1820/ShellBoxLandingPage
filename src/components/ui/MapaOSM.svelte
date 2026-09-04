@@ -6,10 +6,10 @@
    * Mapa real de OpenStreetMap con el punto de recogida marcado.
    *
    * Leaflet pesa unos 150 KB y accede a `window` nada más importarse, así que
-   * se carga con un import dinámico dentro del observador: no se descarga en el
-   * servidor, no entra en el paquete inicial de la portada y solo llega al
-   * navegador cuando el mapa está a punto de aparecer en pantalla. Importante
-   * para quien entra con datos móviles.
+   * se carga con un import dinámico. Sumado a `client:visible` en la página,
+   * su código no se ejecuta en el servidor, no entra en el paquete inicial de
+   * la portada y solo se descarga cuando el lector llega hasta aquí.
+   * Importante para quien entra con datos móviles.
    */
   const { lat, lng, zoom, etiqueta, aproximado } = ENTREGA.mapa;
 
@@ -110,30 +110,16 @@
   }
 
   onMount(() => {
-    if (!contenedor) return;
-
-    // Sin IntersectionObserver se carga directamente: es preferible el coste a
-    // quedarse sin mapa.
-    if (!('IntersectionObserver' in window)) {
-      iniciar();
-      return;
-    }
-
-    const observador = new IntersectionObserver(
-      (entradas) => {
-        if (!entradas.some((e) => e.isIntersecting)) return;
-        observador.disconnect();
-        iniciar();
-      },
-      { rootMargin: '300px' }
-    );
-
-    observador.observe(contenedor);
+    // No hace falta observar la visibilidad aquí: `client:visible` ya retrasa
+    // la hidratación de esta isla hasta que entra en pantalla, así que llegar
+    // a este punto ya significa que el mapa se está viendo. Un segundo
+    // observador solo añadía otro punto donde quedarse colgado.
+    iniciar();
 
     return () => {
-      observador.disconnect();
       observadorTamano?.disconnect();
       mapa?.remove();
+      mapa = null;
     };
   });
 </script>
