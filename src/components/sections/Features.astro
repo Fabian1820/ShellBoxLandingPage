@@ -119,10 +119,12 @@ import MapaOSM from '../ui/MapaOSM.svelte';
         </div>
 
         <div class="order-1 min-h-[22rem] lg:order-2">
-          {/* client:visible: la isla no se hidrata hasta llegar aquí, y dentro
-              Leaflet se importa de forma dinámica, así que sus 150 KB no entran
-              en la carga inicial de la portada. */}
-          <MapaOSM client:visible />
+          {/* client:idle y no client:visible: esta isla pesa 4 KB y su
+              hidratación no puede depender de un IntersectionObserver, porque
+              si no se dispara el mapa se queda en un panel muerto. Los 146 KB
+              de Leaflet sí se posponen, pero desde dentro del componente, que
+              tiene respaldos si la detección de visibilidad falla. */}
+          <MapaOSM client:idle />
         </div>
       </div>
     </div>

@@ -13,9 +13,16 @@
    */
   const { lat, lng, zoom, etiqueta, aproximado } = ENTREGA.mapa;
 
+  /**
+   * `espera`   → aún no toca cargar; se enseña un panel estático con enlace.
+   * `cargando` → Leaflet se está descargando.
+   * `listo`    → mapa dibujado.
+   * `error`    → no se pudo; queda el enlace a OpenStreetMap.
+   */
+  type Fase = 'espera' | 'cargando' | 'listo' | 'error';
+
   let contenedor = $state<HTMLDivElement | null>(null);
-  let cargando = $state(true);
-  let error = $state(false);
+  let fase = $state<Fase>('espera');
   let zoomLibre = $state(false);
 
   /** Instancia de Leaflet, guardada para poder alternar el zoom con la rueda. */
@@ -25,7 +32,8 @@
   const enlaceExterno = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=${zoom}/${lat}/${lng}`;
 
   async function iniciar() {
-    if (!contenedor) return;
+    if (!contenedor || fase !== 'espera') return;
+    fase = 'cargando';
 
     try {
       const [{ default: L }] = await Promise.all([
@@ -80,7 +88,7 @@
           `<strong>${etiqueta}</strong>${aproximado ? '<br><em>Ubicación aproximada</em>' : ''}`
         );
 
-      cargando = false;
+      fase = 'listo';
 
       // Leaflet fija el tamaño al crearse. Si el contenedor cambia después
       // (una columna que se reordena, el móvil al girar, una fuente que
@@ -93,8 +101,7 @@
       }
     } catch (e) {
       console.error('No se pudo cargar el mapa:', e);
-      error = true;
-      cargando = false;
+      fase = 'error';
     }
   }
 
@@ -110,13 +117,76 @@
   }
 
   onMount(() => {
-    // No hace falta observar la visibilidad aquí: `client:visible` ya retrasa
-    // la hidratación de esta isla hasta que entra en pantalla, así que llegar
-    // a este punto ya significa que el mapa se está viendo. Un segundo
-    // observador solo añadía otro punto donde quedarse colgado.
-    iniciar();
+    if (!contenedor) return;
+
+    // Leaflet son 146 KB: no se piden hasta que el lector llega hasta aquí.
+    // Pero si la detección falla, el usuario se queda mirando un panel muerto,
+    // así que hay tres caminos y basta con que funcione uno.
+    let observador: IntersectionObserver | null = null;
+    let programado = false;
+
+    function estaCerca() {
+      if (!contenedor) return false;
+      const alto = window.innerHeight || document.documentElement.clientHeight;
+      // Sin altura fiable no se puede decidir: se carga y punto.
+      if (!alto) return true;
+      const r = contenedor.getBoundingClientRect();
+      return r.top < alto + 300 && r.bottom > -300;
+    }
+
+    function comprobar() {
+      programado = false;
+      if (fase !== 'espera') return desconectar();
+      if (estaCerca()) {
+        desconectar();
+        iniciar();
+      }
+    }
+
+    function alDesplazar() {
+      if (programado) return;
+      programado = true;
+      // setTimeout y no requestAnimationFrame: rAF se suspende justo cuando
+      // este respaldo tiene que actuar.
+      setTimeout(comprobar, 80);
+    }
+
+    function desconectar() {
+      observador?.disconnect();
+      observador = null;
+      window.removeEventListener('scroll', alDesplazar);
+      window.removeEventListener('resize', alDesplazar);
+    }
+
+    if ('IntersectionObserver' in window) {
+      observador = new IntersectionObserver(
+        (entradas) => {
+          if (entradas.some((e) => e.isIntersecting)) {
+            desconectar();
+            iniciar();
+          }
+        },
+        { rootMargin: '300px' }
+      );
+      observador.observe(contenedor);
+    }
+
+    window.addEventListener('scroll', alDesplazar, { passive: true });
+    window.addEventListener('resize', alDesplazar, { passive: true });
+    comprobar();
+
+    // Red de seguridad: si a los 6 segundos nada lo ha disparado, se carga
+    // igualmente. Es preferible gastar los 146 KB a dejar un panel inerte.
+    const respaldo = setTimeout(() => {
+      if (fase === 'espera') {
+        desconectar();
+        iniciar();
+      }
+    }, 6000);
 
     return () => {
+      clearTimeout(respaldo);
+      desconectar();
       observadorTamano?.disconnect();
       mapa?.remove();
       mapa = null;
@@ -127,26 +197,39 @@
 <div class="envoltorio">
   <div bind:this={contenedor} class="lienzo" role="application" aria-label={etiqueta}></div>
 
-  {#if cargando}
+  {#if fase === 'espera' || fase === 'cargando'}
+    <!-- Panel previo: nunca un spinner a secas, siempre con la salida a
+         OpenStreetMap por si el mapa no llegara a cargar. -->
     <div class="estado" aria-live="polite">
-      <svg class="girando" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity="0.25" />
-        <path d="M22 12a10 10 0 00-10-10" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+      <svg class="icono-lugar" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path
+          d="M12 21s7-5.6 7-11a7 7 0 10-14 0c0 5.4 7 11 7 11z"
+          stroke="currentColor"
+          stroke-width="1.6"
+        />
+        <circle cx="12" cy="10" r="2.4" stroke="currentColor" stroke-width="1.6" />
       </svg>
-      <p>Cargando el mapa…</p>
-    </div>
-  {/if}
-
-  {#if error}
-    <div class="estado">
-      <p class="titulo-error">No se pudo cargar el mapa</p>
+      <p class="titulo-estado">{ENTREGA.lugar}</p>
+      <p class="pie-estado">
+        {fase === 'cargando' ? 'Cargando el mapa…' : 'Punto de recogida'}
+      </p>
       <a href={enlaceExterno} target="_blank" rel="noopener noreferrer" class="enlace">
-        Ver la ubicación en OpenStreetMap
+        Ver en OpenStreetMap
       </a>
     </div>
   {/if}
 
-  {#if !cargando && !error}
+  {#if fase === 'error'}
+    <div class="estado">
+      <p class="titulo-estado">No se pudo cargar el mapa</p>
+      <p class="pie-estado">{ENTREGA.lugar}</p>
+      <a href={enlaceExterno} target="_blank" rel="noopener noreferrer" class="enlace">
+        Ver en OpenStreetMap
+      </a>
+    </div>
+  {/if}
+
+  {#if fase === 'listo'}
     <!-- Control del zoom con la rueda, para no secuestrar el scroll de la página. -->
     <button class="boton-zoom" onclick={alternarZoom} type="button">
       {zoomLibre ? 'Bloquear zoom' : 'Activar zoom'}
@@ -209,9 +292,22 @@
     z-index: 500;
   }
 
-  .titulo-error {
-    font-weight: 600;
+  .titulo-estado {
+    font-weight: 700;
+    font-size: 1.05rem;
     color: var(--text);
+  }
+
+  .pie-estado {
+    font-size: 0.8rem;
+    color: var(--text-faint);
+    margin-top: -0.4rem;
+  }
+
+  .icono-lugar {
+    width: 2.25rem;
+    height: 2.25rem;
+    color: var(--color-brand-coral);
   }
 
   .enlace {
@@ -219,19 +315,6 @@
     font-weight: 600;
     text-decoration: underline;
     text-underline-offset: 4px;
-  }
-
-  .girando {
-    width: 1.75rem;
-    height: 1.75rem;
-    color: var(--color-brand-coral);
-    animation: girar 0.9s linear infinite;
-  }
-
-  @keyframes girar {
-    to {
-      transform: rotate(360deg);
-    }
   }
 
   .boton-zoom,
@@ -286,7 +369,9 @@
     height: 2.5rem;
     color: var(--color-brand-coral);
     filter: drop-shadow(0 3px 5px rgb(0 0 0 / 0.35));
-    animation: caer-pin 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    /* Sin fill-mode a propósito: el estado base ya es el definitivo, así que
+       si la animación no llega a ejecutarse el pin se ve igualmente. */
+    animation: caer-pin 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   :global(.marcador-shellbox .pin svg) {
@@ -343,8 +428,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     :global(.marcador-shellbox .pin),
-    :global(.marcador-shellbox .pulso),
-    .girando {
+    :global(.marcador-shellbox .pulso) {
       animation: none;
     }
 
