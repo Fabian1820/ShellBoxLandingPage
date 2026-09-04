@@ -131,6 +131,25 @@ export const ENTREGA = {
   lugar: 'El Vedado, La Habana',
   plazoRecogida: '7 días hábiles',
   aviso: 'Grupo oficial de WhatsApp',
+
+  /**
+   * Punto exacto donde se marca el mapa.
+   *
+   * PENDIENTE: ahora mismo apunta al centro aproximado del Vedado. Sustituye
+   * `lat` y `lng` por las coordenadas reales del local. Se sacan en
+   * openstreetmap.org o Google Maps: clic derecho sobre el punto → copiar
+   * coordenadas. El orden es latitud primero, longitud después.
+   */
+  mapa: {
+    lat: 23.1372,
+    lng: -82.3862,
+    /** 16 enseña la manzana; 15 la barriada; 17 el portal. */
+    zoom: 16,
+    /** Texto del globo que sale al pulsar el marcador. */
+    etiqueta: 'ShellBox Encargos · Punto de recogida',
+    /** Precisión del punto. Ponlo en false cuando las coordenadas sean exactas. */
+    aproximado: true,
+  },
 } as const;
 
 export const FAQS = [

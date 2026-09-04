@@ -15,6 +15,16 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()],
+
+    // Leaflet es CommonJS y solo se carga con un import dinámico. Sin declararlo
+    // aquí, Vite lo descubre en caliente durante el desarrollo, reoptimiza las
+    // dependencias y acaba con dos copias del runtime de Svelte cargadas a la vez
+    // (que fallan con «lifecycle_outside_component»). Pre-empaquetarlo al
+    // arrancar lo evita; la compilación de producción no se ve afectada.
+    optimizeDeps: {
+      include: ['leaflet'],
+    },
+
     build: {
       cssMinify: 'lightningcss',
     }

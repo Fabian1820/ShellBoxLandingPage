@@ -6,6 +6,12 @@
       "runtimeExecutable": "sh",
       "runtimeArgs": ["-c", "set -a; . ./.env; set +a; exec npx astro dev --port 4321"],
       "port": 4321
+    },
+    {
+      "name": "shellbox-prod",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "set -a; . ./.env; set +a; export HOST=127.0.0.1 PORT=4322; exec node ./dist/server/entry.mjs"],
+      "port": 4322
     }
   ]
 }

@@ -1,6 +1,6 @@
 ---
 import { VENTAJAS, ENTREGA } from '../../lib/config';
-import MapaVedado from '../ui/MapaVedado.astro';
+import MapaOSM from '../ui/MapaOSM.svelte';
 ---
 
 <section class="py-28 sm:py-32" id="ventajas">
@@ -118,8 +118,11 @@ import MapaVedado from '../ui/MapaVedado.astro';
           </dl>
         </div>
 
-        <div class="order-1 lg:order-2">
-          <MapaVedado />
+        <div class="order-1 min-h-[22rem] lg:order-2">
+          {/* client:visible: la isla no se hidrata hasta llegar aquí, y dentro
+              Leaflet se importa de forma dinámica, así que sus 150 KB no entran
+              en la carga inicial de la portada. */}
+          <MapaOSM client:visible />
         </div>
       </div>
     </div>
